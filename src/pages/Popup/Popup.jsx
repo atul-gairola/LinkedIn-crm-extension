@@ -1,25 +1,20 @@
 import React from 'react';
-import logo from '../../assets/img/logo.svg';
-import Greetings from '../../containers/Greetings/Greetings';
 import './Popup.css';
 
 const Popup = () => {
+  const handleDashboardPage = (e) => {
+    e.preventDefault();
+    chrome.tabs.create({
+      url: `chrome-extension://${chrome.runtime.id}/dashboard.html`,
+    });
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/pages/Popup/Popup.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React!
-        </a>
-      </header>
+      <h1>LinkedIn CRM</h1>
+      <button id="manage" onClick={handleDashboardPage}>
+        Manage connections
+      </button>
     </div>
   );
 };
