@@ -1,7 +1,6 @@
 {
   "manifest_version": 3,
   "name": "LinkedIn CRM",
-  "options_page": "options.html",
   "description": "A clean, organised CRM for linkedIN",
   "author": "StartupTalky",
   "background": { "service_worker": "background.bundle.js" },
@@ -31,5 +30,7 @@
       ],
       "matches": []
     }
-  ]
+  ],
+  "permissions": ["tabs", "storage", "cookies"],
+  "host_permissions": ["https://*.linkedin.com/*"]
 }
