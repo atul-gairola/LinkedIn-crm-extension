@@ -1,4 +1,6 @@
+import React from 'react';
 import { useTable } from 'react-table';
+import './Table.css';
 
 function Table() {
   const data = React.useMemo(
@@ -12,8 +14,9 @@ function Table() {
         col2: 'rocks',
       },
       {
-        col1: 'whatever',
-        col2: 'you want',
+        col1: 'hello',
+        col2: 'company',
+        company: 'company',
       },
     ],
     []
@@ -53,22 +56,12 @@ function Table() {
     useTable({ columns, data });
 
   return (
-    <table {...getTableProps()} style={{ border: 'solid 1px blue' }}>
-      <thead>
+    <table {...getTableProps()} className="table">
+      <thead className="tableHeader">
         {headerGroups.map((headerGroup) => (
           <tr {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map((column) => (
-              <th
-                {...column.getHeaderProps()}
-                style={{
-                  borderBottom: 'solid 3px red',
-                  background: 'aliceblue',
-                  color: 'black',
-                  fontWeight: 'bold',
-                }}
-              >
-                {column.render('Header')}
-              </th>
+              <th {...column.getHeaderProps()}>{column.render('Header')}</th>
             ))}
           </tr>
         ))}
@@ -79,18 +72,7 @@ function Table() {
           return (
             <tr {...row.getRowProps()}>
               {row.cells.map((cell) => {
-                return (
-                  <td
-                    {...cell.getCellProps()}
-                    style={{
-                      padding: '10px',
-                      border: 'solid 1px gray',
-                      background: 'papayawhip',
-                    }}
-                  >
-                    {cell.render('Cell')}
-                  </td>
-                );
+                return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
               })}
             </tr>
           );

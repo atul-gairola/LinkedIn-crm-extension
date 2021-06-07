@@ -1,0 +1,26 @@
+.table {
+  width: 100%;
+  border-spacing: 0;
+}
+
+.tableHeader {
+  background: transparent;
+}
+
+th {
+  padding: 15px 10px;
+  font-size: 0.9rem;
+  text-align: start;
+}
+
+tbody{
+    background: #fff;
+}
+
+td {
+  padding: 10px;
+  border: 1px solid #000;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
