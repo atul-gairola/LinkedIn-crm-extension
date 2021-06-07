@@ -281,7 +281,10 @@ async function getProfileView(profileIdentifier) {
 async function initialize(sendResponse) {
   const loggedInUser = await getLoggedInUser();
   const allContacts = await getAllOwnContacts();
-
+  console.log({
+    userDetails: loggedInUser,
+    contacts: allContacts,
+  });
   sendResponse({
     userDetails: loggedInUser,
     contacts: allContacts,
