@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+import Header from './Header';
+
 function Dashboard() {
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +24,17 @@ function Dashboard() {
     });
   }, []);
 
-  return <div>{loading ? <h1>Loading</h1> : <h1>Dashboard</h1>}</div>;
+  return (
+    <div>
+      {/* {loading ? (
+        <h1>Loading</h1>
+      ) : ( */}
+        <div>
+          <Header fullName={"Atul Gairola"} size={40} />
+        </div>
+      {/* )} */}
+    </div>
+  );
 }
 
 export default Dashboard;

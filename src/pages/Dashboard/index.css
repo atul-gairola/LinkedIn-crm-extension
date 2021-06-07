@@ -1,0 +1,13 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+*:active {
+  outline: none;
+}
+
+body {
+  background: #f1f4f7;
+}
