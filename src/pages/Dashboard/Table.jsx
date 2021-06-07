@@ -1,26 +1,42 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTable } from 'react-table';
+import axios from 'axios';
+
 import './Table.css';
 
 function Table() {
-  const data = React.useMemo(
-    () => [
-      {
-        col1: 'Hello',
-        col2: 'World',
-      },
-      {
-        col1: 'react-table',
-        col2: 'rocks',
-      },
-      {
-        col1: 'hello',
-        col2: 'company',
-        company: 'company',
-      },
-    ],
-    []
-  );
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState([]);
+  const [pagination, setPagination] = useState({
+    count: 50,
+    start: 0,
+  });
+  
+  // const data = React.useMemo(
+  //   () => [
+  //     {
+  //       col1: 'Hello',
+  //       col2: 'World',
+  //     },
+  //     {
+  //       col1: 'react-table',
+  //       col2: 'rocks',
+  //     },
+  //     {
+  //       col1: 'hello',
+  //       col2: 'company',
+  //       company: 'company',
+  //     },
+  //   ],
+  //   []
+  // );
+
+  useEffect(() => {
+    setLoading(true);
+    const fetchData = async () => {
+      await axios.get(`http://localhost:8000/connections?`);
+    };
+  }, []);
 
   const columns = React.useMemo(
     () => [

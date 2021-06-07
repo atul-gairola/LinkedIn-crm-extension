@@ -9,19 +9,17 @@ function Dashboard() {
 
   useEffect(() => {
     setLoading(true);
-    console.log('Getting data');
     chrome.runtime.sendMessage({ action: 'initialize' }, async (response) => {
       console.log(response);
-      setLoading(false);
-      /**
-       * @todo
-       * Send data to api
-       */
       const { data } = await axios.post(
         `http://localhost:8000/connections/init`,
         response
       );
       console.log(data);
+      const { userDetails, contacts } = data;
+      // save the user in the storage
+      chrome.storage.sync.set({ linkedInUser: JSON.stringify(userDetails) });
+      setLoading(false);
     });
   }, []);
 
@@ -32,7 +30,7 @@ function Dashboard() {
       ) : ( */}
       <div>
         <Header fullName={'Atul Gairola'} size={40} />
-        <Table />
+        {loading ? <p>Loading</p> : <Table />}
       </div>
       {/* )} */}
     </div>

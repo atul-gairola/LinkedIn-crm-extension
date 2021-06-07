@@ -102,7 +102,10 @@ async function getLoggedInUser() {
       entityUrn: resp.entityUrn,
       industryName: resp.industryName,
       profileId:
-        resp.entityUrn && resp.entityUrn.replace('urn:li:fsd_profile:', ''),
+        resp.entityUrn &&
+        resp.entityUrn
+          .replace('urn:li:fsd_profile:', '')
+          .replace('urn:li:fs_profile:', ''),
       location: resp.geoLocationName,
       publicIdentifier: resp.miniProfile && resp.miniProfile.publicIdentifier,
       profilePicture:
