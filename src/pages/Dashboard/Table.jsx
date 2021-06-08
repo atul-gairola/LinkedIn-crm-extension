@@ -38,9 +38,9 @@ function Table({ user }) {
         industry: cur.industryName || '',
         id: cur._id,
         entityUrn: cur.entityUrn,
+        publicIdentifier: cur.publicIdentifier,
+        profileId: cur.profileId,
       }));
-
-      console.log('Connections Arr: ', connectionsArr);
 
       setConnections(connectionsArr);
       setLoading(false);
@@ -53,7 +53,57 @@ function Table({ user }) {
     const {
       row: { original },
     } = cell;
-    const { id, entityUrn } = original;
+    const { id, entityUrn, profileId, publicIdentifier } = original;
+
+    chrome.runtime.sendMessage(
+      {
+        action: 'updateConnection',
+        profileId: profileId || entityUrn.replace('urn:li:fsd_profile:', ''),
+        publicIdentifier: publicIdentifier,
+      },
+      async (res) => {
+        console.log(res);
+        console.log(cell);
+        const { data: result } = await axios.patch(
+          `http://localhost:8000/connections/update/${entityUrn}`,
+          res,
+          {
+            headers: {
+              liuser: user._id,
+            },
+          }
+        );
+
+        const { data, meta } = result;
+
+        console.log(data.update);
+
+        setConnections((prev) => {
+          const copy = [...prev];
+          copy[Number(cell.row.id)] = {
+            fullName: data.update.fullName || '',
+            connectedAt: formatTimeStamp(data.update.connectedAt) || '',
+            headline: data.update.headline || '',
+            company: data.update.company || '',
+            companyTitle: data.update.companyTitle || '',
+            contact: `${data.update.contact.emailAddress || ''}\n${
+              (data.update.contact.phoneNumbers &&
+                data.update.contact.phoneNumbers[0]) ||
+              ''
+            }\n${data.update.contact.address || ''}`,
+            location: `${data.update.location || ''}, ${
+              data.update.country || ''
+            }`,
+            industry: data.update.industryName || '',
+            id: data.update._id,
+            entityUrn: data.update.entityUrn,
+            publicIdentifier: data.update.publicIdentifier,
+            profileId: data.update.profileId,
+          };
+          return copy;
+        });
+      }
+    );
   };
 
   const columns = React.useMemo(
@@ -97,18 +147,18 @@ function Table({ user }) {
           <button onClick={() => handleUpdateData(cell)}>Fetch</button>
         ),
       },
-      // {
-      //   Header: 'Actions',
-      //   accessor: 'actions',
-      // },
+      {
+        Header: 'Actions',
+        accessor: 'actions',
+      },
     ],
     []
   );
 
-  console.log('connections: ', connections);
-
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
     useTable({ columns, data: connections });
+
+  console.log('connections: ', connections);
 
   return (
     <table {...getTableProps()} className="table">

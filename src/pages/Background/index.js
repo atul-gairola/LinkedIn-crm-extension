@@ -4,6 +4,9 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
     case 'initialize':
       initialize(sendResponse);
       return true;
+    case 'updateConnection':
+      updateConnection(req.profileId, req.publicIdentifier, sendResponse);
+      return true;
   }
 });
 
@@ -284,12 +287,20 @@ async function getProfileView(profileIdentifier) {
 async function initialize(sendResponse) {
   const loggedInUser = await getLoggedInUser();
   const allContacts = await getAllOwnContacts();
-  console.log({
-    userDetails: loggedInUser,
-    contacts: allContacts,
-  });
   sendResponse({
     userDetails: loggedInUser,
     contacts: allContacts,
+  });
+}
+
+async function updateConnection(profileId, publicIdentifier, sendResponse) {
+  console.log(profileId);
+  console.log(publicIdentifier);
+  const contactInfo = await getProfileContactInfo(profileId);
+  const profileView = await getProfileView(publicIdentifier);
+
+  sendResponse({
+    ...contactInfo,
+    ...profileView,
   });
 }

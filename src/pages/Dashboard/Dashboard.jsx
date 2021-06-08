@@ -20,6 +20,15 @@ function Dashboard() {
       await chrome.storage.sync.set({
         linkedInUser: JSON.stringify(user),
       });
+
+      await chrome.storage.sync.set({
+        totalConnections: user.totalConnections,
+      });
+
+      await chrome.storage.sync.set({
+        retrievedConnections: user.retrievedConnections,
+      });
+
       setLinkedInUser(user);
       setLoading(false);
     });
