@@ -18,7 +18,7 @@ function Header({ fullName, profilePicture }) {
           <Heading size={600}>LinkedIn CRM</Heading>
         </Pane>
         <Pane>
-          <Avatar name={fullName} size={40} src={profilePicture}></Avatar>
+          <Avatar name={fullName} size={40} color="purple" src={profilePicture}></Avatar>
         </Pane>
       </Pane>
     </header>
