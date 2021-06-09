@@ -1,6 +1,7 @@
-import React, { cloneElement, useEffect, useState } from 'react';
-import { useTable, usePagination, useSortBy } from 'react-table';
+import React, { useEffect, useState } from 'react';
+import { useTable } from 'react-table';
 import axios from 'axios';
+import debounce from 'lodash.debounce';
 
 import './Table.css';
 import { formatTimeStamp } from './utils';
@@ -14,6 +15,10 @@ function Table({ user }) {
   });
   const [totalResults, setTotalResults] = useState(0);
   const [sorting, setSorting] = useState('connectedAt_desc');
+  const [filters, setFilters] = useState({
+    search: [],
+    searchIn: [],
+  });
 
   function formatConnectionDataToRowData(connection) {
     return {
@@ -36,9 +41,29 @@ function Table({ user }) {
     };
   }
 
-  async function fetchConnections(start, count, sortBy, sortOrder) {
+  async function fetchConnections(
+    start,
+    count,
+    sortBy,
+    sortOrder,
+    searchIn,
+    search
+  ) {
+    console.log(searchIn);
+    console.log(search);
+    let searchUrl = ``;
+    if (searchIn.length === 0) {
+      searchUrl = `&searchIn=&search=`;
+    } else {
+      searchIn.forEach((cur, i) => {
+        searchUrl += `&searchIn=${cur}&search=${search[i]}`;
+      });
+    }
+
+    console.log(searchUrl);
+
     const { data } = await axios.get(
-      `http://localhost:8000/connections?start=${start}&count=${count}&sortBy=${sortBy}&sortOrder=${sortOrder}`,
+      `http://localhost:8000/connections?start=${start}&count=${count}&sortBy=${sortBy}&sortOrder=${sortOrder}${searchUrl}`,
       {
         headers: {
           liuser: user._id,
@@ -56,7 +81,9 @@ function Table({ user }) {
       pagination.count * (pagination.currentPage - 1),
       pagination.count,
       sorting.split('_')[0],
-      sorting.split('_')[1] === 'asc' ? 1 : -1
+      sorting.split('_')[1] === 'asc' ? 1 : -1,
+      filters.searchIn,
+      filters.search
     );
     const connectionsArr = data.connections.map((cur) =>
       formatConnectionDataToRowData(cur)
@@ -73,7 +100,7 @@ function Table({ user }) {
 
   useEffect(() => {
     fetchData();
-  }, [pagination, sorting]);
+  }, [pagination, sorting, filters]);
 
   const handleUpdateData = (cell) => {
     const {
@@ -100,7 +127,7 @@ function Table({ user }) {
 
         const { data, meta } = result;
 
-        console.log(data.update);
+        // console.log(data.update);
 
         setConnections((prev) => {
           const copy = [...prev];
@@ -191,6 +218,38 @@ function Table({ user }) {
     setSorting(value);
   };
 
+  const handleSearch = (e) => {
+    const { value, name } = e.target;
+    setFilters((prev) => {
+      let searchIn =
+        value === '' ? [...prev.searchIn] : [...prev.searchIn, name];
+      let search = value === '' ? [...prev.search] : [...prev.search, value];
+
+      if (value === '') {
+        const index = searchIn.indexOf(name);
+        if (index !== -1) {
+          searchIn = [...prev.searchIn];
+          searchIn.splice(index, 1);
+          search = [...prev.search];
+          search.splice(index, 1);
+        }
+      } else {
+        const index = prev.searchIn.indexOf(name);
+        if (index !== -1) {
+          searchIn = [...prev.searchIn];
+          const searchArr = [...prev.search];
+          searchArr[index] = value;
+          search = searchArr;
+        }
+      }
+
+      console.log('Search In: ', searchIn);
+      console.log('search: ', search);
+
+      return { ...prev, searchIn: searchIn, search: search };
+    });
+  };
+
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
     useTable({
       columns,
@@ -251,6 +310,16 @@ function Table({ user }) {
           <option value="connectedAt_asc">Connected At (asc)</option>
           <option value="connectedAt_desc">Connected At (desc)</option>
         </select>
+      </div>
+      <div className="filters">
+        <label>Search Name</label>
+        <input type="text" name="fullName" onChange={handleSearch} />
+        <label>Search Headline</label>
+        <input type="text" name="headline" onChange={handleSearch} />
+        <label>Search Location</label>
+        <input type="text" name="location" onChange={handleSearch} />
+        <label>Search Company</label>
+        <input type="text" name="company" onChange={handleSearch} />
       </div>
       <table {...getTableProps()} className="table">
         <thead className="tableHeader">
