@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 import Header from './Header';
-import Table from './Table';
+import Table from './Table/Table';
 
 function Dashboard() {
   const [loading, setLoading] = useState(false);
