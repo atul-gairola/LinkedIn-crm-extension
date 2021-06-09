@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useTable, usePagination } from 'react-table';
+import React, { cloneElement, useEffect, useState } from 'react';
+import { useTable, usePagination, useSortBy } from 'react-table';
 import axios from 'axios';
 
 import './Table.css';
 import { formatTimeStamp } from './utils';
-import { Button } from 'evergreen-ui';
 
 function Table({ user }) {
   const [loading, setLoading] = useState(false);
@@ -14,6 +13,7 @@ function Table({ user }) {
     currentPage: 1,
   });
   const [totalResults, setTotalResults] = useState(0);
+  const [sorting, setSorting] = useState('connectedAt_desc');
 
   function formatConnectionDataToRowData(connection) {
     return {
@@ -36,9 +36,9 @@ function Table({ user }) {
     };
   }
 
-  async function fetchConnections(start, count) {
+  async function fetchConnections(start, count, sortBy, sortOrder) {
     const { data } = await axios.get(
-      `http://localhost:8000/connections?start=${start}&count=${count}`,
+      `http://localhost:8000/connections?start=${start}&count=${count}&sortBy=${sortBy}&sortOrder=${sortOrder}`,
       {
         headers: {
           liuser: user._id,
@@ -54,7 +54,9 @@ function Table({ user }) {
 
     const { data, meta } = await fetchConnections(
       pagination.count * (pagination.currentPage - 1),
-      pagination.count
+      pagination.count,
+      sorting.split('_')[0],
+      sorting.split('_')[1] === 'asc' ? 1 : -1
     );
     const connectionsArr = data.connections.map((cur) =>
       formatConnectionDataToRowData(cur)
@@ -71,7 +73,7 @@ function Table({ user }) {
 
   useEffect(() => {
     fetchData();
-  }, [pagination]);
+  }, [pagination, sorting]);
 
   const handleUpdateData = (cell) => {
     const {
@@ -184,8 +186,16 @@ function Table({ user }) {
     []
   );
 
+  const handleSorting = (e) => {
+    const { value } = e.target;
+    setSorting(value);
+  };
+
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-    useTable({ columns, data: connections }, usePagination);
+    useTable({
+      columns,
+      data: connections,
+    });
 
   function getPaginationDetails() {
     const startCount = (pagination.currentPage - 1) * pagination.count + 1;
@@ -227,6 +237,19 @@ function Table({ user }) {
           <option value={50}>50</option>
           <option value={70}>70</option>
           <option value={100}>100</option>
+        </select>
+      </div>
+      <div className="sorting">
+        <select
+          name="sorting"
+          id="sorting"
+          value={sorting}
+          onChange={handleSorting}
+        >
+          <option value="fullName_asc">Name (asc)</option>
+          <option value="fullName_desc">Name (desc)</option>
+          <option value="connectedAt_asc">Connected At (asc)</option>
+          <option value="connectedAt_desc">Connected At (desc)</option>
         </select>
       </div>
       <table {...getTableProps()} className="table">
