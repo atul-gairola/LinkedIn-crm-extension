@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useTable } from 'react-table';
+import { useTable, usePagination } from 'react-table';
 import axios from 'axios';
 
 import './Table.css';
@@ -11,43 +11,67 @@ function Table({ user }) {
   const [connections, setConnections] = useState([]);
   const [pagination, setPagination] = useState({
     count: 50,
-    start: 0,
+    currentPage: 1,
   });
+  const [totalResults, setTotalResults] = useState(0);
+
+  function formatConnectionDataToRowData(connection) {
+    return {
+      fullName: connection.fullName || '',
+      connectedAt: formatTimeStamp(connection.connectedAt) || '',
+      headline: connection.headline || '',
+      company: connection.company || '',
+      companyTitle: connection.companyTitle || '',
+      contact: `${connection.contact.emailAddress || ''}\n${
+        (connection.contact.phoneNumbers &&
+          connection.contact.phoneNumbers[0]) ||
+        ''
+      }\n${connection.contact.address || ''}`,
+      location: `${connection.location || ''}, ${connection.country || ''}`,
+      industry: connection.industryName || '',
+      id: connection._id,
+      entityUrn: connection.entityUrn,
+      publicIdentifier: connection.publicIdentifier,
+      profileId: connection.profileId,
+    };
+  }
+
+  async function fetchConnections(start, count) {
+    const { data } = await axios.get(
+      `http://localhost:8000/connections?start=${start}&count=${count}`,
+      {
+        headers: {
+          liuser: user._id,
+        },
+      }
+    );
+
+    return data;
+  }
+
+  const fetchData = async () => {
+    setLoading(true);
+
+    const { data, meta } = await fetchConnections(
+      pagination.count * (pagination.currentPage - 1),
+      pagination.count
+    );
+    const connectionsArr = data.connections.map((cur) =>
+      formatConnectionDataToRowData(cur)
+    );
+    console.log(meta);
+    setTotalResults(meta.totalResults);
+    setConnections(connectionsArr);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    setLoading(true);
-    const fetchData = async () => {
-      const { data } = await axios.get(
-        `http://localhost:8000/connections?start=${pagination.start}&count=${pagination.count}`,
-        {
-          headers: {
-            liuser: user._id,
-          },
-        }
-      );
-      const connectionsArr = data.data.connections.map((cur) => ({
-        fullName: cur.fullName || '',
-        connectedAt: formatTimeStamp(cur.connectedAt) || '',
-        headline: cur.headline || '',
-        company: cur.company || '',
-        companyTitle: cur.companyTitle || '',
-        contact: `${cur.contact.emailAddress || ''}\n${
-          (cur.contact.phoneNumbers && cur.contact.phoneNumbers[0]) || ''
-        }\n${cur.contact.address || ''}`,
-        location: `${cur.location || ''}, ${cur.country || ''}`,
-        industry: cur.industryName || '',
-        id: cur._id,
-        entityUrn: cur.entityUrn,
-        publicIdentifier: cur.publicIdentifier,
-        profileId: cur.profileId,
-      }));
-
-      setConnections(connectionsArr);
-      setLoading(false);
-    };
-
     fetchData();
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [pagination]);
 
   const handleUpdateData = (cell) => {
     const {
@@ -62,8 +86,6 @@ function Table({ user }) {
         publicIdentifier: publicIdentifier,
       },
       async (res) => {
-        console.log(res);
-        console.log(cell);
         const { data: result } = await axios.patch(
           `http://localhost:8000/connections/update/${entityUrn}`,
           res,
@@ -80,30 +102,37 @@ function Table({ user }) {
 
         setConnections((prev) => {
           const copy = [...prev];
-          copy[Number(cell.row.id)] = {
-            fullName: data.update.fullName || '',
-            connectedAt: formatTimeStamp(data.update.connectedAt) || '',
-            headline: data.update.headline || '',
-            company: data.update.company || '',
-            companyTitle: data.update.companyTitle || '',
-            contact: `${data.update.contact.emailAddress || ''}\n${
-              (data.update.contact.phoneNumbers &&
-                data.update.contact.phoneNumbers[0]) ||
-              ''
-            }\n${data.update.contact.address || ''}`,
-            location: `${data.update.location || ''}, ${
-              data.update.country || ''
-            }`,
-            industry: data.update.industryName || '',
-            id: data.update._id,
-            entityUrn: data.update.entityUrn,
-            publicIdentifier: data.update.publicIdentifier,
-            profileId: data.update.profileId,
-          };
+          copy[Number(cell.row.id)] = formatConnectionDataToRowData(
+            data.update
+          );
           return copy;
         });
       }
     );
+  };
+
+  const handlePage = async (e) => {
+    const { name } = e.target;
+    if (name === 'next') {
+      setPagination((prev) => ({
+        ...prev,
+        currentPage: prev.currentPage + 1,
+      }));
+    } else {
+      setPagination((prev) => ({
+        ...prev,
+        currentPage: prev.currentPage - 1,
+      }));
+    }
+  };
+
+  const handleCountChange = async (e) => {
+    const { value } = e.target;
+    console.log(value);
+    setPagination((prev) => ({
+      ...prev,
+      count: value,
+    }));
   };
 
   const columns = React.useMemo(
@@ -156,34 +185,76 @@ function Table({ user }) {
   );
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-    useTable({ columns, data: connections });
+    useTable({ columns, data: connections }, usePagination);
 
-  console.log('connections: ', connections);
+  function getPaginationDetails() {
+    const startCount = (pagination.currentPage - 1) * pagination.count + 1;
+    const endCount =
+      startCount + pagination.count > totalResults
+        ? totalResults
+        : startCount + pagination.count;
+    return `${startCount} - ${endCount} / ${totalResults}`;
+  }
 
   return (
-    <table {...getTableProps()} className="table">
-      <thead className="tableHeader">
-        {headerGroups.map((headerGroup) => (
-          <tr {...headerGroup.getHeaderGroupProps()}>
-            {headerGroup.headers.map((column) => (
-              <th {...column.getHeaderProps()}>{column.render('Header')}</th>
-            ))}
-          </tr>
-        ))}
-      </thead>
-      <tbody {...getTableBodyProps()}>
-        {rows.map((row) => {
-          prepareRow(row);
-          return (
-            <tr {...row.getRowProps()}>
-              {row.cells.map((cell) => {
-                return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
-              })}
+    <>
+      <div className="pagination">
+        <p>{getPaginationDetails()}</p>
+        <p>Page : {pagination.currentPage}</p>
+        <button
+          disabled={pagination.currentPage === 1}
+          name="prev"
+          onClick={handlePage}
+        >
+          {'<'}
+        </button>
+        <button
+          disabled={
+            pagination.currentPage ===
+            Math.ceil(totalResults / pagination.count)
+          }
+          name="next"
+          onClick={handlePage}
+        >
+          {'>'}
+        </button>
+        <select
+          name="countPerPage"
+          id="count-per-page"
+          value={pagination.count}
+          onChange={handleCountChange}
+        >
+          <option value={50}>50</option>
+          <option value={70}>70</option>
+          <option value={100}>100</option>
+        </select>
+      </div>
+      <table {...getTableProps()} className="table">
+        <thead className="tableHeader">
+          {headerGroups.map((headerGroup) => (
+            <tr {...headerGroup.getHeaderGroupProps()}>
+              {headerGroup.headers.map((column) => (
+                <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+              ))}
             </tr>
-          );
-        })}
-      </tbody>
-    </table>
+          ))}
+        </thead>
+        <tbody {...getTableBodyProps()}>
+          {rows.map((row) => {
+            prepareRow(row);
+            return (
+              <tr {...row.getRowProps()}>
+                {row.cells.map((cell) => {
+                  return (
+                    <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </>
   );
 }
 
