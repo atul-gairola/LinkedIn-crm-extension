@@ -1,0 +1,16 @@
+.container {
+  display: grid;
+  padding: 10px;
+  text-align: center;
+  height: 100%;
+}
+
+.container img {
+  width: 50px;
+  justify-self: center;
+  margin-bottom: 15px;
+}
+
+.container button{
+    justify-self: center;
+}
