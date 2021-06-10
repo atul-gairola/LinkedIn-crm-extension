@@ -1,4 +1,5 @@
 import React from 'react';
+import { SelectField, option } from 'evergreen-ui';
 
 function Sorting({ sorting, setSorting }) {
   /**
@@ -15,17 +16,20 @@ function Sorting({ sorting, setSorting }) {
   return (
     <div>
       <div className="sorting">
-        <select
+        <SelectField
+          description="Sorting"
+          value={sorting}
           name="sorting"
           id="sorting"
-          value={sorting}
           onChange={handleSorting}
+          width={240}
+          height={40}
         >
           <option value="fullName_asc">Name (asc)</option>
           <option value="fullName_desc">Name (desc)</option>
           <option value="connectedAt_asc">Connected At (asc)</option>
           <option value="connectedAt_desc">Connected At (desc)</option>
-        </select>
+        </SelectField>
       </div>
     </div>
   );

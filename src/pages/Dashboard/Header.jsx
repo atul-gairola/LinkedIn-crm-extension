@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Avatar, Pane, Heading, Text } from 'evergreen-ui';
 
 import './Header.css';

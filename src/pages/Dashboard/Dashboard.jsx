@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Pane } from 'evergreen-ui';
 import axios from 'axios';
 
 import Header from './Header';
@@ -75,17 +76,19 @@ function Dashboard() {
   return (
     <div>
       {!linkedInUser ? (
-        <div style={{width: "100%", height: "100vh"}} >
-        <Loading />
+        <div style={{ width: '100%', height: '100vh' }}>
+          <Loading />
         </div>
       ) : (
         <div>
           <Header user={linkedInUser} retConnections={retConnections} />
-          <Table
-            user={linkedInUser}
-            retConnections={retConnections}
-            latestRetConnection={latestRetConnection}
-          />
+          <Pane paddingX={30} marginTop={50}>
+            <Table
+              user={linkedInUser}
+              retConnections={retConnections}
+              latestRetConnection={latestRetConnection}
+            />
+          </Pane>
         </div>
       )}
     </div>

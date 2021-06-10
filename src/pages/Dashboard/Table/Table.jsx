@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTable } from 'react-table';
+import { Pane } from 'evergreen-ui';
 import axios from 'axios';
 
 import './Table.css';
@@ -216,13 +217,15 @@ function Table({ user, latestRetConnection }) {
 
   return (
     <>
-      <Pagination
-        pagination={pagination}
-        setPagination={setPagination}
-        totalResults={totalResults}
-      />
-      <Sorting sorting={sorting} setSorting={setSorting} />
-      <Filters setFilters={setFilters} />
+      <Pane>
+        <Pagination
+          pagination={pagination}
+          setPagination={setPagination}
+          totalResults={totalResults}
+        />
+        <Sorting sorting={sorting} setSorting={setSorting} />
+        <Filters setFilters={setFilters} />
+      </Pane>
       <table {...getTableProps()} className="table">
         <thead className="tableHeader">
           {headerGroups.map((headerGroup) => (
