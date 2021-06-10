@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Avatar, Pane, Heading } from 'evergreen-ui';
 
 import styles from './Header.css';
 
-function Header({ fullName, profilePicture }) {
+function Header({ user, retConnections }) {
+  const { fullName, profilePicture, totalConnections } = user;
+
   return (
     <header className={styles.header}>
       <Pane
@@ -18,7 +20,18 @@ function Header({ fullName, profilePicture }) {
           <Heading size={600}>LinkedIn CRM</Heading>
         </Pane>
         <Pane>
-          <Avatar name={fullName} size={40} color="purple" src={profilePicture}></Avatar>
+          <div>
+            <p>Updated connections</p>
+            <p>
+              {retConnections} / {totalConnections}
+            </p>
+          </div>
+          <Avatar
+            name={fullName}
+            size={40}
+            color="purple"
+            src={profilePicture}
+          ></Avatar>
         </Pane>
       </Pane>
     </header>

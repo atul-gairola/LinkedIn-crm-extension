@@ -43,3 +43,5 @@ export function formatConnectionDataToRowData(connection) {
     profileId: connection.profileId,
   };
 }
+
+export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

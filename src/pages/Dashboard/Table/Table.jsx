@@ -14,7 +14,7 @@ import { formatConnectionDataToRowData } from '../utils';
  * @returns Table component
  */
 
-function Table({ user }) {
+function Table({ user, latestRetConnection }) {
   // STATES
   const [loading, setLoading] = useState(false);
   const [connections, setConnections] = useState([]);
@@ -107,6 +107,12 @@ function Table({ user }) {
   useEffect(() => {
     fetchData();
   }, [pagination, sorting, filters]);
+
+  // runs when latest retrieved connection gets updated
+  useEffect(() => {
+    console.log(latestRetConnection);
+    console.log(connections);
+  }, [latestRetConnection]);
 
   // HANDLERS
 

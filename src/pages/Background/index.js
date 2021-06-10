@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 // Listener for runtime messages
 chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
   switch (req.action) {
@@ -7,10 +9,16 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
     case 'updateConnection':
       updateConnection(req.profileId, req.publicIdentifier, sendResponse);
       return true;
+    case 'getNextUpdate':
+      getNextUpdate(sendResponse);
+      return true;
   }
 });
 
 // -----------------
+
+// helper function which adds a pause to the code for given ms
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * @desc Find the csrf token of the logged in linked in user
@@ -284,6 +292,10 @@ async function getProfileView(profileIdentifier) {
 
 // -----------------
 
+/**
+ * @desc Sends initial data to the dashboard
+ * @param {Object} sendResponse
+ */
 async function initialize(sendResponse) {
   const loggedInUser = await getLoggedInUser();
   const allContacts = await getAllOwnContacts();
@@ -293,14 +305,68 @@ async function initialize(sendResponse) {
   });
 }
 
-async function updateConnection(profileId, publicIdentifier, sendResponse) {
-  console.log(profileId);
-  console.log(publicIdentifier);
+// -----------------
+
+async function getCompleteProfileData(profileId, publicIdentifier) {
   const contactInfo = await getProfileContactInfo(profileId);
+  sleep(500);
   const profileView = await getProfileView(publicIdentifier);
 
-  sendResponse({
+  return {
     ...contactInfo,
     ...profileView,
+  };
+}
+
+// -----------------
+
+/**
+ * @desc Collects and sends complete user info to the dashboard
+ * @param {String} profileId
+ * @param {String} publicIdentifier
+ * @param {Object} sendResponse
+ */
+
+async function updateConnection(profileId, publicIdentifier, sendResponse) {
+  const data = await getCompleteProfileData(profileId, publicIdentifier);
+
+  sendResponse({
+    ...data,
   });
+}
+
+// -----------------
+
+async function getNextUpdate() {
+  await sleep(5000);
+
+  // get the next connection to update
+  const res = await fetch('http://localhost:8000/connections/update/next', {
+    method: 'GET',
+  });
+  const data = await res.json();
+  const { next } = data;
+
+  // if no next connection return
+  if (!next) {
+    chrome.runtime.sendMessage({ message: 'collected_all' }, () => {});
+    return;
+  }
+
+  const profileId =
+    next.profileId || next.entityUrn.replace('urn:li:fsd_profile:', '');
+
+  // get the complete data
+  let profileData = await getCompleteProfileData(
+    profileId,
+    next.publicIdentifier
+  );
+
+  await sleep(3000);
+
+  // send the data to dashboard
+  chrome.runtime.sendMessage(
+    { message: 'next_data', updateData: profileData },
+    () => {}
+  );
 }
