@@ -1,4 +1,9 @@
 import React from 'react';
+import {
+  Pane,
+  SelectField,
+  Pagination as PaginationUiComponent,
+} from 'evergreen-ui';
 
 function Pagination({ pagination, setPagination, totalResults }) {
   /**
@@ -6,8 +11,8 @@ function Pagination({ pagination, setPagination, totalResults }) {
    * @param {Object} [e] The event object in js click
    */
 
-  const handlePage = async (e) => {
-    const { name } = e.target;
+  const handlePage = (name) => {
+    // const { name } = e.target;
     if (name === 'next') {
       setPagination((prev) => ({
         ...prev,
@@ -23,12 +28,21 @@ function Pagination({ pagination, setPagination, totalResults }) {
 
   // -----
 
+  const handleDirectPageChange = (page) => {
+    setPagination((prev) => ({
+      ...prev,
+      currentPage: page,
+    }));
+  };
+
+  // -----
+
   /**
    * @desc Sets the count value in pagination state
    * @param {Object} [e] The event object in js click
    */
 
-  const handleCountChange = async (e) => {
+  const handleCountChange = (e) => {
     const { value } = e.target;
     console.log(value);
     setPagination((prev) => ({
@@ -54,37 +68,33 @@ function Pagination({ pagination, setPagination, totalResults }) {
 
   return (
     <div>
-      <div className="pagination">
-        <p>{getPaginationDetails()}</p>
-        <p>Page : {pagination.currentPage}</p>
-        <button
-          disabled={pagination.currentPage === 1}
-          name="prev"
-          onClick={handlePage}
-        >
-          {'<'}
-        </button>
-        <button
-          disabled={
-            pagination.currentPage ===
-            Math.ceil(totalResults / pagination.count)
-          }
-          name="next"
-          onClick={handlePage}
-        >
-          {'>'}
-        </button>
-        <select
+      <Pane
+        display="grid"
+        gridTemplateColumns="auto auto"
+        alignItems="center"
+        gridGap={24}
+      >
+        <SelectField
           name="countPerPage"
           id="count-per-page"
+          width={70}
+          description="Per Page"
+          height={40}
           value={pagination.count}
           onChange={handleCountChange}
         >
           <option value={50}>50</option>
           <option value={70}>70</option>
           <option value={100}>100</option>
-        </select>
-      </div>
+        </SelectField>
+        <PaginationUiComponent
+          page={pagination.currentPage}
+          totalPages={Math.ceil(totalResults / pagination.count)}
+          onNextPage={() => handlePage('next')}
+          onPreviousPage={() => handlePage('prev')}
+          onPageChange={handleDirectPageChange}
+        ></PaginationUiComponent>
+      </Pane>
     </div>
   );
 }
