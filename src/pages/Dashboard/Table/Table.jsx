@@ -8,6 +8,14 @@ import {
   RefreshIcon,
   TextInputField,
   DownloadIcon,
+  Popover,
+  Menu,
+  PersonIcon,
+  ChatIcon,
+  DisableIcon,
+  FollowingIcon,
+  FollowerIcon,
+  Position
 } from 'evergreen-ui';
 import { debounce } from 'debounce';
 import axios from 'axios';
@@ -310,7 +318,24 @@ function Table({ user, latestRetConnection }) {
       {
         Header: 'Actions',
         accessor: 'actions',
-        Cell: ({ cell }) => <MoreIcon cursor="pointer" marginX="auto" />,
+        Cell: ({ cell }) => (
+          <Popover
+            position={Position.BOTTOM_LEFT}
+            content={
+              <Menu>
+                <Menu.Group>
+                  <Menu.Item icon={PersonIcon}>Visit Profile</Menu.Item>
+                  <Menu.Item icon={ChatIcon}>Message</Menu.Item>
+                  <Menu.Item icon={DisableIcon}>Disconnect</Menu.Item>
+                  <Menu.Item icon={FollowingIcon}>Follow</Menu.Item>
+                  <Menu.Item icon={FollowerIcon}>Unfollow</Menu.Item>
+                </Menu.Group>
+              </Menu>
+            }
+          >
+            <MoreIcon cursor="pointer" marginX="auto" />
+          </Popover>
+        ),
         className: 'actionsCell',
       },
     ],
