@@ -31,11 +31,15 @@ export function formatConnectionDataToRowData(connection) {
     headline: connection.headline || '',
     company: connection.company || '',
     companyTitle: connection.companyTitle || '',
-    contact: `${connection.contact.emailAddress || ''}\n${
+    contact: `${connection.contact.emailAddress || ''}
+    ${
       (connection.contact.phoneNumbers && connection.contact.phoneNumbers[0]) ||
       ''
-    }\n${connection.contact.address || ''}`,
-    location: `${connection.location || ''}, ${connection.country || ''}`,
+    }
+    ${connection.contact.address || ''}`,
+    location: `${connection.location || ''}${connection.location ? ', ' : ''}${
+      connection.country || ''
+    }`,
     industry: connection.industryName || '',
     id: connection._id,
     entityUrn: connection.entityUrn,

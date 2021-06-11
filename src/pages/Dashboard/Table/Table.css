@@ -1,26 +1,99 @@
+.tableContainer {
+  max-height: 500px;
+  overflow-y: auto;
+  position: relative;
+  margin-bottom: 30px;
+  border-radius: 0 0 5px 5px;
+}
+
+.tableContainer::-webkit-scrollbar {
+  width: 5px;
+}
+
+.tableContainer::-webkit-scrollbar-track {
+  background: #dfe1ff;
+}
+
+.tableContainer::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  border-radius: 25px;
+  height: 25%;
+}
+
 .table {
   width: 100%;
   border-spacing: 0;
 }
 
 .tableHeader {
-  background: transparent;
+  background: #dfe1ff;
+  color: #5154ffda;
+  padding: 0 10px;
+  position: sticky;
+  border-radius: 5px;
+  border: none;
+  top: 0;
+  z-index: 200;
 }
 
 th {
-  padding: 15px 10px;
-  font-size: 0.9rem;
+  padding: 10px;
+  font-size: 0.8rem;
+
   text-align: start;
+  font-weight: 700;
 }
 
-tbody{
-    background: #fff;
+tbody {
+  background: #fff;
+  border-radius: 5px;
 }
 
 td {
   padding: 10px;
-  border: 1px solid #000;
+  border: 1px solid rgba(0, 0, 0, 0.2);
   border-left: 0;
   border-right: 0;
   border-top: 0;
+  font-size: 0.8rem;
+  min-width: 100px;
+}
+
+.actionsCell {
+  text-align: center;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.checkboxCell {
+  padding: 15px;
+  min-width: 0 !important;
+}
+
+.fetchInfoCell {
+  min-width: 100px;
+}
+
+.connectedAtCell {
+  min-width: 130px;
+}
+.locationCell {
+  min-width: 130px;
+}
+.contactInfoCell {
+  white-space: pre-line;
+}
+
+.searchFilterContainer {
+  display: grid;
+  grid-template-columns: 200px 200px 200px;
+  grid-gap: 20px;
+}
+
+.filters {
+  padding: 10px;
+  margin-top: 20px;
+}
+
+.hide {
+  display: none;
 }

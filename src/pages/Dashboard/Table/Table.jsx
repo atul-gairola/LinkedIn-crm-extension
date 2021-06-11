@@ -1,6 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useTable } from 'react-table';
-import { Pane } from 'evergreen-ui';
+import {
+  Pane,
+  Checkbox,
+  MoreIcon,
+  Button,
+  RefreshIcon,
+  TextInputField,
+  DownloadIcon,
+} from 'evergreen-ui';
+import { debounce } from 'debounce';
 import axios from 'axios';
 
 import './Table.css';
@@ -29,6 +38,9 @@ function Table({ user, latestRetConnection }) {
     search: [],
     searchIn: [],
   });
+  const [selected, setSelected] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState([]);
 
   // -----
 
@@ -94,6 +106,8 @@ function Table({ user, latestRetConnection }) {
     console.log(meta);
     setTotalResults(meta.totalResults);
     setConnections(connectionsArr);
+    setSelected(connectionsArr.map((cur) => false));
+    setFetchLoading(connectionsArr.map((cur) => false));
     setLoading(false);
   };
 
@@ -126,7 +140,11 @@ function Table({ user, latestRetConnection }) {
       row: { original },
     } = cell;
     const { id, entityUrn, profileId, publicIdentifier } = original;
-
+    setFetchLoading((prev) => {
+      const arr = [...prev];
+      arr[cell.row.id] = true;
+      return arr;
+    });
     chrome.runtime.sendMessage(
       {
         action: 'updateConnection',
@@ -146,6 +164,8 @@ function Table({ user, latestRetConnection }) {
 
         const { data, meta } = result;
 
+        console.log(data);
+
         setConnections((prev) => {
           const copy = [...prev];
           copy[Number(cell.row.id)] = formatConnectionDataToRowData(
@@ -153,57 +173,145 @@ function Table({ user, latestRetConnection }) {
           );
           return copy;
         });
+        console.log(fetchLoading);
+        setFetchLoading((prev) => {
+          const arr = [...prev];
+          arr[cell.row.id] = false;
+          return arr;
+        });
       }
     );
   };
 
+  /**
+   * @desc Set searchIn and search in filters state
+   * @param {Object} [e] The event object in js click
+   */
+
+  const handleSearch = (e) => {
+    const { value, name } = e.target;
+    setFilters((prev) => {
+      let searchIn =
+        value === '' ? [...prev.searchIn] : [...prev.searchIn, name];
+      let search = value === '' ? [...prev.search] : [...prev.search, value];
+
+      if (value === '') {
+        const index = searchIn.indexOf(name);
+        if (index !== -1) {
+          searchIn = [...prev.searchIn];
+          searchIn.splice(index, 1);
+          search = [...prev.search];
+          search.splice(index, 1);
+        }
+      } else {
+        const index = prev.searchIn.indexOf(name);
+        if (index !== -1) {
+          searchIn = [...prev.searchIn];
+          const searchArr = [...prev.search];
+          searchArr[index] = value;
+          search = searchArr;
+        }
+      }
+
+      return { ...prev, searchIn: searchIn, search: search };
+    });
+  };
+
+  const handler = useCallback(debounce(handleSearch, 300), []);
+
   // -----
+
+  const handleCheckAll = () => {
+    setSelectAll(true);
+    setSelected((prev) => prev.map(() => true));
+  };
 
   // Columns for the table
   const columns = React.useMemo(
     () => [
       {
+        Header: (
+          <Checkbox
+            borderColor="#5153ff"
+            checked={selectAll}
+            onChange={handleCheckAll}
+          />
+        ),
+        accessor: 'check',
+        Cell: (row) => (
+          <Checkbox
+            borderColor="#5153ff"
+            checked={selected[row.index]}
+            onChange={(e) => setSelected(e.target.checked)}
+          />
+        ),
+        className: 'checkboxCell',
+      },
+      {
         Header: 'Name',
         accessor: 'fullName', // accessor is the "key" in the data
+        className: 'nameCell',
       },
       {
         Header: 'Connected',
         accessor: 'connectedAt',
+        className: 'connectedAtCell',
       },
       {
         Header: 'Headline',
         accessor: 'headline',
+        className: 'headlineCell',
       },
       {
         Header: 'Location',
         accessor: 'location',
+        className: 'locationCell',
       },
       {
         Header: 'Company',
         accessor: 'company',
+        className: 'companyCell',
       },
       {
         Header: 'Title',
         accessor: 'companyTitle',
+        className: 'companyTitleCell',
       },
       {
         Header: 'Contact Info',
         accessor: 'contact',
+        className: 'contactInfoCell',
       },
       {
         Header: 'Industry',
         accessor: 'industry',
+        className: 'industryCell',
       },
       {
         Header: 'Fetch info',
         accessor: 'fetch',
-        Cell: ({ cell }) => (
-          <button onClick={() => handleUpdateData(cell)}>Fetch</button>
-        ),
+        Cell: (row) => {
+          return (
+            <Button
+              onClick={() => handleUpdateData(row.cell)}
+              // color="#cfd2fc"
+              // color="#8690fa"
+              color="#5153ff"
+              disabled={fetchLoading[row.id]}
+              iconBefore={RefreshIcon}
+              size="medium"
+            >
+              Update
+            </Button>
+          );
+        },
+        className: 'fetchInfoCell',
       },
       {
         Header: 'Actions',
         accessor: 'actions',
+        Cell: ({ cell }) => <MoreIcon cursor="pointer" marginX="auto" />,
+        className: 'actionsCell',
       },
     ],
     []
@@ -216,19 +324,51 @@ function Table({ user, latestRetConnection }) {
     });
 
   return (
-    <>
-      <Pane>
-        <Filters setFilters={setFilters} />
+    <Pane>
+      <Pane marginBottom={20}>
+        <Filters handler={handler} />
       </Pane>
-      <Pane paddingTop={20}>
+      <Pane
+        background="#fff"
+        boxShadow="0px 4px 20px rgba(0, 0, 0, 0.06)"
+        style={{ borderRadius: '5px 5px 5px 5px' }}
+        paddingTop={0}
+      >
         <div
           style={{
             alignItems: 'end',
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
+            padding: '20px',
           }}
         >
-          <Sorting sorting={sorting} setSorting={setSorting} />
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '160px 200px auto',
+              alignItems: 'end',
+              gridGap: '30px',
+            }}
+          >
+            <Sorting sorting={sorting} setSorting={setSorting} />
+            <TextInputField
+              name="fullName"
+              onChange={(e) => handler(e)}
+              // description="Search"
+              label="Search"
+              width={200}
+              marginBottom={2}
+              placeholder="Search in name"
+            />
+            <Button
+              maxWidth={100}
+              iconBefore={DownloadIcon}
+              appearance="primary"
+              marginBottom={4}
+            >
+              Download
+            </Button>
+          </div>
           <Pane justifySelf="end">
             <Pagination
               pagination={pagination}
@@ -237,35 +377,45 @@ function Table({ user, latestRetConnection }) {
             />
           </Pane>
         </div>
-        <table {...getTableProps()} className="table">
-          <thead className="tableHeader">
-            {headerGroups.map((headerGroup) => (
-              <tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column) => (
-                  <th {...column.getHeaderProps()}>
-                    {column.render('Header')}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody {...getTableBodyProps()}>
-            {rows.map((row) => {
-              prepareRow(row);
-              return (
-                <tr {...row.getRowProps()}>
-                  {row.cells.map((cell) => {
-                    return (
-                      <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                    );
-                  })}
+        <div className="tableContainer">
+          <table {...getTableProps()} className="table">
+            <thead className="tableHeader">
+              {headerGroups.map((headerGroup) => (
+                <tr {...headerGroup.getHeaderGroupProps()}>
+                  {headerGroup.headers.map((column, i) => (
+                    <th
+                      style={i === 0 ? { paddingLeft: '15px' } : {}}
+                      {...column.getHeaderProps()}
+                    >
+                      {column.render('Header')}
+                    </th>
+                  ))}
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              ))}
+            </thead>
+            <tbody {...getTableBodyProps()}>
+              {rows.map((row) => {
+                prepareRow(row);
+                return (
+                  <tr {...row.getRowProps()}>
+                    {row.cells.map((cell) => {
+                      return (
+                        <td
+                          {...cell.getCellProps()}
+                          className={`${cell.column.className || ''}`}
+                        >
+                          {cell.render('Cell')}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </Pane>
-    </>
+    </Pane>
   );
 }
 

@@ -17,13 +17,14 @@ function Sorting({ sorting, setSorting }) {
     <div>
       <div className="sorting">
         <SelectField
-          description="Sorting"
+          label="Sorting"
           value={sorting}
           name="sorting"
           id="sorting"
           onChange={handleSorting}
-          width={240}
+          width={160}
           height={40}
+          marginBottom={20}
         >
           <option value="fullName_asc">Name (asc)</option>
           <option value="fullName_desc">Name (desc)</option>

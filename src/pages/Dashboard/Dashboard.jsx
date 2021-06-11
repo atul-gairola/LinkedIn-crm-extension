@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Pane } from 'evergreen-ui';
+import { Pane, Text } from 'evergreen-ui';
 import axios from 'axios';
 
 import Header from './Header';
@@ -89,6 +89,12 @@ function Dashboard() {
               latestRetConnection={latestRetConnection}
             />
           </Pane>
+          <div style={{ textAlign: 'center', marginBottom: 20 }}>
+            <Text>
+              {chrome.runtime.getManifest().name} - v
+              {chrome.runtime.getManifest().version}
+            </Text>
+          </div>
         </div>
       )}
     </div>

@@ -1,58 +1,59 @@
-import React, { useCallback } from 'react';
-import { debounce } from 'debounce';
+import React, { useState } from 'react';
+import {
+  Button,
+  FilterOpenIcon,
+  TextInputField,
+  SmallCrossIcon,
+} from 'evergreen-ui';
 
-function Filters({ setFilters }) {
-  /**
-   * @desc Set searchIn and search in filters state
-   * @param {Object} [e] The event object in js click
-   */
+function Filters({ handler }) {
+  const [showFilters, setShowFilters] = useState(false);
 
-  const handleSearch = (e) => {
-    const { value, name } = e.target;
-    setFilters((prev) => {
-      let searchIn =
-        value === '' ? [...prev.searchIn] : [...prev.searchIn, name];
-      let search = value === '' ? [...prev.search] : [...prev.search, value];
-
-      if (value === '') {
-        const index = searchIn.indexOf(name);
-        if (index !== -1) {
-          searchIn = [...prev.searchIn];
-          searchIn.splice(index, 1);
-          search = [...prev.search];
-          search.splice(index, 1);
-        }
-      } else {
-        const index = prev.searchIn.indexOf(name);
-        if (index !== -1) {
-          searchIn = [...prev.searchIn];
-          const searchArr = [...prev.search];
-          searchArr[index] = value;
-          search = searchArr;
-        }
-      }
-
-      console.log('Search In: ', searchIn);
-      console.log('search: ', search);
-
-      return { ...prev, searchIn: searchIn, search: search };
-    });
+  const toggleShowFilters = () => {
+    setShowFilters((prev) => !prev);
   };
 
-  const handler = useCallback(debounce(handleSearch, 300), []);
-
-  // -----
   return (
     <div>
-      <div className="filters">
-        <label>Search Name</label>
-        <input type="text" name="fullName" onChange={(e) => handler(e)} />
-        <label>Search Headline</label>
-        <input type="text" name="headline" onChange={(e) => handler(e)} />
-        <label>Search Location</label>
-        <input type="text" name="location" onChange={(e) => handler(e)} />
-        <label>Search Company</label>
-        <input type="text" name="company" onChange={(e) => handler(e)} />
+      <div>
+        <Button
+          onClick={toggleShowFilters}
+          style={
+            showFilters ? { color: '#5153ff', borderColor: '#5153ff' } : {}
+          }
+          iconBefore={FilterOpenIcon}
+          marginRight={15}
+        >
+          Filters
+        </Button>
+        <Button iconAfter={SmallCrossIcon} intent="danger">
+          Clear Filters
+        </Button>
+      </div>
+      <div className={`filters ${!showFilters ? 'hide' : ''}`}>
+        <div className="searchFilterContainer">
+          <TextInputField
+            name="headline"
+            onChange={(e) => handler(e)}
+            width={200}
+            description="Headline"
+            placeholder="Search in headline"
+          />
+          <TextInputField
+            name="location"
+            onChange={(e) => handler(e)}
+            width={200}
+            description="Location"
+            placeholder="Search in location"
+          />
+          <TextInputField
+            name="company"
+            onChange={(e) => handler(e)}
+            width={200}
+            description="Company"
+            placeholder="Search in name"
+          />
+        </div>
       </div>
     </div>
   );
