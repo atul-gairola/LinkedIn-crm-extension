@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar, Pane, Heading, Text } from 'evergreen-ui';
+import { Avatar, Pane, Heading, Text, Tooltip } from 'evergreen-ui';
 
 import './Header.css';
 import logo from '../../assets/img/icon.svg';
@@ -39,9 +39,11 @@ function Header({ user, retConnections }) {
                 Last Sync
               </Text>
               <br />
-              <Text whiteSpace="nowrap" size={200} fontWeight="bold">
-                9 / Jun / 2021 5:45 PM
-              </Text>
+              <Tooltip content="Last synced">
+                <Text whiteSpace="nowrap" size={200} fontWeight="bold">
+                  9 / Jun / 2021 5:45 PM
+                </Text>
+              </Tooltip>
             </Pane>
             <Pane>
               <Text whiteSpace="nowrap" size={300}>
@@ -49,17 +51,27 @@ function Header({ user, retConnections }) {
               </Text>
               <br />
               <Text whiteSpace="nowrap" size={200} fontWeight="bold">
-                {retConnections} / {totalConnections}
+                <Tooltip content="Retrieved connections">
+                  <span style={{ color: '#5153ff' }}>{retConnections}</span>
+                </Tooltip>{' '}
+                /{' '}
+                <Tooltip content="Total connections">
+                  <span> {totalConnections} </span>
+                </Tooltip>
               </Text>
             </Pane>
           </Pane>
-          <Avatar
-            name={fullName}
-            size={40}
-            color="purple"
-            src={profilePicture}
-            cursor="pointer"
-          ></Avatar>
+          <Tooltip content={fullName}>
+            <Avatar
+              // name={fullName}
+              size={40}
+              color="purple"
+              src={profilePicture}
+              cursor="pointer"
+            >
+              {fullName}
+            </Avatar>
+          </Tooltip>
         </Pane>
       </Pane>
     </header>
