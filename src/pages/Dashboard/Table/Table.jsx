@@ -218,39 +218,53 @@ function Table({ user, latestRetConnection }) {
   return (
     <>
       <Pane>
-        <Pagination
-          pagination={pagination}
-          setPagination={setPagination}
-          totalResults={totalResults}
-        />
-        <Sorting sorting={sorting} setSorting={setSorting} />
         <Filters setFilters={setFilters} />
       </Pane>
-      <table {...getTableProps()} className="table">
-        <thead className="tableHeader">
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column) => (
-                <th {...column.getHeaderProps()}>{column.render('Header')}</th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row) => {
-            prepareRow(row);
-            return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map((cell) => {
-                  return (
-                    <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                  );
-                })}
+      <Pane paddingTop={20}>
+        <div
+          style={{
+            alignItems: 'end',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+          }}
+        >
+          <Sorting sorting={sorting} setSorting={setSorting} />
+          <Pane justifySelf="end">
+            <Pagination
+              pagination={pagination}
+              setPagination={setPagination}
+              totalResults={totalResults}
+            />
+          </Pane>
+        </div>
+        <table {...getTableProps()} className="table">
+          <thead className="tableHeader">
+            {headerGroups.map((headerGroup) => (
+              <tr {...headerGroup.getHeaderGroupProps()}>
+                {headerGroup.headers.map((column) => (
+                  <th {...column.getHeaderProps()}>
+                    {column.render('Header')}
+                  </th>
+                ))}
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            ))}
+          </thead>
+          <tbody {...getTableBodyProps()}>
+            {rows.map((row) => {
+              prepareRow(row);
+              return (
+                <tr {...row.getRowProps()}>
+                  {row.cells.map((cell) => {
+                    return (
+                      <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </Pane>
     </>
   );
 }

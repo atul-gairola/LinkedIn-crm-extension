@@ -68,25 +68,14 @@ function Pagination({ pagination, setPagination, totalResults }) {
 
   return (
     <div>
-      <Pane
-        display="grid"
-        gridTemplateColumns="auto auto"
-        alignItems="center"
-        gridGap={24}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'auto auto',
+          gridGap: 24,
+          alignItems: 'end',
+        }}
       >
-        <SelectField
-          name="countPerPage"
-          id="count-per-page"
-          width={70}
-          description="Per Page"
-          height={40}
-          value={pagination.count}
-          onChange={handleCountChange}
-        >
-          <option value={50}>50</option>
-          <option value={70}>70</option>
-          <option value={100}>100</option>
-        </SelectField>
         <PaginationUiComponent
           page={pagination.currentPage}
           totalPages={Math.ceil(totalResults / pagination.count)}
@@ -94,7 +83,20 @@ function Pagination({ pagination, setPagination, totalResults }) {
           onPreviousPage={() => handlePage('prev')}
           onPageChange={handleDirectPageChange}
         ></PaginationUiComponent>
-      </Pane>
+        <SelectField
+          name="countPerPage"
+          id="count-per-page"
+          width={70}
+          description="Per Page"
+          value={pagination.count}
+          onChange={handleCountChange}
+          marginBottom={0}
+        >
+          <option value={50}>50</option>
+          <option value={70}>70</option>
+          <option value={100}>100</option>
+        </SelectField>
+      </div>
     </div>
   );
 }
