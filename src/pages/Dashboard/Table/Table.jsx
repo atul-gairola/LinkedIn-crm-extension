@@ -25,7 +25,7 @@ import Pagination from './components/Pagination';
 import Sorting from './components/Sorting';
 import Filters from './components/Filters';
 import SendMessage from './components/SendMessage';
-import { formatConnectionDataToRowData } from '../utils';
+import { formatConnectionDataToRowData } from '../../../utils';
 
 /**
  * @desc React component

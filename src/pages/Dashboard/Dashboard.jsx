@@ -5,7 +5,7 @@ import axios from 'axios';
 import Header from './Header';
 import Table from './Table/Table';
 import Loading from '../../components/Loading';
-import { sleep } from './utils';
+import { sleep } from '../../utils';
 
 function Dashboard() {
   const [loading, setLoading] = useState(false);

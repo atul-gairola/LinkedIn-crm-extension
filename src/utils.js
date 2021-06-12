@@ -61,3 +61,27 @@ export const getProfileIdFromUrn = (entityUrn) => {
 export const capitalizeFirstLetter = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
+
+export const replaceTemplateWithValue = (template, data) => {
+  let tempStr = template;
+
+  function replace() {
+    const openIndex = tempStr.indexOf('{{');
+    const closeIndex = tempStr.indexOf('}}');
+
+    if (openIndex !== -1 && closeIndex !== -1) {
+      const key = tempStr.substring(openIndex + 2, closeIndex);
+      tempStr =
+        tempStr.substring(0, openIndex) +
+        data[key] +
+        tempStr.substring(openIndex + key.length + 4, tempStr.length);
+      replace();
+    } else {
+      return;
+    }
+  }
+
+  replace();
+
+  return tempStr;
+};

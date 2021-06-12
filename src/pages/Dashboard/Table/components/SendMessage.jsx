@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   TextareaField,
@@ -7,7 +7,11 @@ import {
   Select,
   Button,
 } from 'evergreen-ui';
-import { getProfileIdFromUrn, capitalizeFirstLetter } from '../../utils';
+import {
+  getProfileIdFromUrn,
+  capitalizeFirstLetter,
+  replaceTemplateWithValue,
+} from '../../../../utils';
 
 function SendMessage({ showSendMessage, setShowSendMessage }) {
   const [loading, setLoading] = useState(false);
@@ -42,9 +46,9 @@ function SendMessage({ showSendMessage, setShowSendMessage }) {
           value: {
             'com.linkedin.voyager.messaging.create.MessageCreate': {
               attachments: [],
-              body: message,
+              body: replaceTemplateWithValue(message, showSendMessage),
               attributedBody: {
-                text: message,
+                text: replaceTemplateWithValue(message, showSendMessage),
                 attributes: [],
               },
               mediaAttachments: [],
@@ -61,7 +65,6 @@ function SendMessage({ showSendMessage, setShowSendMessage }) {
         messagePayload,
       },
       (resp) => {
-        console.log(resp);
         if (resp.status === 'success') {
           toaster.success('Message sent successfully', {
             description: `Your message has been successfully sent to ${showSendMessage.fullName}`,
