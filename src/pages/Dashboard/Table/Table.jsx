@@ -24,6 +24,7 @@ import './Table.css';
 import Pagination from './components/Pagination';
 import Sorting from './components/Sorting';
 import Filters from './components/Filters';
+import SendMessage from './components/SendMessage';
 import { formatConnectionDataToRowData } from '../utils';
 
 /**
@@ -49,6 +50,7 @@ function Table({ user, latestRetConnection }) {
   const [selected, setSelected] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [fetchLoading, setFetchLoading] = useState([]);
+  const [showSendMessage, setShowSendMessage] = useState(false);
 
   // -----
 
@@ -235,7 +237,7 @@ function Table({ user, latestRetConnection }) {
   };
 
   const handleVisitProfile = (publicIdentifier) => {
-    console.log(publicIdentifier);
+    // console.log(publicIdentifier);
     chrome.tabs.create({ url: `https://linkedin.com/in/${publicIdentifier}` });
   };
 
@@ -324,29 +326,35 @@ function Table({ user, latestRetConnection }) {
         Header: 'Actions',
         accessor: 'actions',
         Cell: ({ cell }) => {
-          console.log(cell);
+          // console.log(cell);
           const { original } = cell.row;
           return (
             <Popover
               position={Position.BOTTOM_LEFT}
-              content={
+              content={({ close }) => (
                 <Menu>
                   <Menu.Group>
                     <Menu.Item
-                      onClick={() =>
-                        handleVisitProfile(original.publicIdentifier)
-                      }
+                      onSelect={() => {
+                        close();
+                        handleVisitProfile(original.publicIdentifier);
+                      }}
                       icon={PersonIcon}
                     >
                       Visit Profile
                     </Menu.Item>
-                    <Menu.Item icon={ChatIcon}>Message</Menu.Item>
+                    <Menu.Item
+                      onSelect={() => setShowSendMessage(original)}
+                      icon={ChatIcon}
+                    >
+                      Message
+                    </Menu.Item>
                     <Menu.Item icon={DisableIcon}>Disconnect</Menu.Item>
                     <Menu.Item icon={FollowingIcon}>Follow</Menu.Item>
                     <Menu.Item icon={FollowerIcon}>Unfollow</Menu.Item>
                   </Menu.Group>
                 </Menu>
-              }
+              )}
             >
               <MoreIcon cursor="pointer" marginX="auto" />
             </Popover>
@@ -366,6 +374,10 @@ function Table({ user, latestRetConnection }) {
 
   return (
     <Pane>
+      <SendMessage
+        showSendMessage={showSendMessage}
+        setShowSendMessage={setShowSendMessage}
+      />
       <Pane marginBottom={20}>
         <Filters handler={handler} />
       </Pane>

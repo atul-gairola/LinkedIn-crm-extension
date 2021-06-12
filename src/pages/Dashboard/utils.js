@@ -45,7 +45,19 @@ export function formatConnectionDataToRowData(connection) {
     entityUrn: connection.entityUrn,
     publicIdentifier: connection.publicIdentifier,
     profileId: connection.profileId,
+    firstName: connection.firstName || '',
+    lastName: connection.lastName || '',
   };
 }
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+//"urn:li:fsd_profile:ACoAAC38bq0B7qMt_J7-cxSDS4KLOYmh51J3JUA"
+export const getProfileIdFromUrn = (entityUrn) => {
+  const arr = entityUrn.split(':');
+  return arr[arr.length - 1];
+};
+
+export const capitalizeFirstLetter = (string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};

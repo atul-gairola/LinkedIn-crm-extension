@@ -1,4 +1,3 @@
-import axios from 'axios';
 
 // Listener for runtime messages
 chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
@@ -11,6 +10,15 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
       return true;
     case 'getNextUpdate':
       getNextUpdate(sendResponse);
+      return true;
+    case 'sendMessage':
+      sendMessage(req, sendResponse);
+      return true;
+    case `followConnection`:
+      return true;
+    case 'unfollowConnection':
+      return true;
+    case 'disconnect':
       return true;
   }
 });
@@ -54,7 +62,8 @@ async function fetchLinkedInUrl(
   url,
   withAcceptHeader = false,
   method = 'GET',
-  body = null
+  body = null,
+  params
 ) {
   try {
     if (body) body = JSON.stringify(body);
@@ -75,14 +84,29 @@ async function fetchLinkedInUrl(
             '{"clientVersion":"1.5.*","osName":"web","timezoneOffset":1,"deviceFormFactor":"DESKTOP","mpName":"voyager-web"}',
         };
 
+    if (params) {
+      let paramStr = '';
+      Object.keys(params).forEach(
+        (cur) => (paramStr += `${cur}=${params[cur]}&`)
+      );
+
+      url += `?${paramStr}`;
+    }
+
+    console.log(url);
+
     const res = await fetch(url, {
       method: method,
       headers: headers,
       body,
       credentials: 'include',
     });
+
+    // console.log(res);
     const text = await res.text();
+    // console.log(text);
     const data = JSON.parse(text);
+    // console.log(data);
     return data;
   } catch (e) {
     console.log(e);
@@ -369,4 +393,34 @@ async function getNextUpdate() {
     { message: 'next_data', updateData: profileData },
     () => {}
   );
+}
+
+async function sendMessage(req, sendResponse) {
+  const { messagePayload } = req;
+  if (messagePayload) {
+    try {
+      const data = await fetchLinkedInUrl(
+        'https://www.linkedin.com/voyager/api/messaging/conversations',
+        false,
+        'POST',
+        messagePayload,
+        { action: 'create' }
+      );
+
+      sendResponse({
+        status: 'success',
+        message: 'Message sent successfully',
+        data: data,
+      });
+    } catch (e) {
+      console.log(e);
+      sendResponse({
+        status: 'Error',
+        message: 'Error while sending message.',
+        error: e,
+      });
+    }
+  } else {
+    sendResponse({ status: 'error', message: 'Message payload is empty.' });
+  }
 }
