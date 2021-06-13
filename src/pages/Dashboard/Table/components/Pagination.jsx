@@ -86,6 +86,7 @@ function Pagination({ pagination, setPagination, totalResults }) {
         <SelectField
           name="countPerPage"
           id="count-per-page"
+          label=""
           width={70}
           description="Per Page"
           value={pagination.count}

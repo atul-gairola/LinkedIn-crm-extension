@@ -47,6 +47,11 @@ export function formatConnectionDataToRowData(connection) {
     profileId: connection.profileId,
     firstName: connection.firstName || '',
     lastName: connection.lastName || '',
+    emailAddress: connection.contact.emailAddress || '',
+    phoneNumber:
+      (connection.contact.phoneNumbers && connection.contact.phoneNumbers[0]) ||
+      '',
+    address: connection.contact.address || '',
   };
 }
 
@@ -84,4 +89,42 @@ export const replaceTemplateWithValue = (template, data) => {
   replace();
 
   return tempStr;
+};
+
+export const connectionCSVData = (connection) => {
+  return [
+    (connection.firstName && `"${connection.firstName}"`) || ' ',
+    (connection.lastName && `"${connection.lastName}"`) || ' ',
+    (connection.connectedAt && `"${connection.connectedAt}"`) || ' ',
+    (connection.headline && `"${connection.headline}"`) || ' ',
+    (connection.company != false && `"${connection.company}"`) || ' ',
+    (connection.companyTitle != false && `"${connection.companyTitle}"`) || ' ',
+    (connection.industry && `"${connection.industry}"`) || ' ',
+    (connection.emailAddress && `"${connection.emailAddress}"`) || ' ',
+    (connection.phoneNumber && `"${connection.phoneNumber}"`) || ' ',
+    (connection.address && `"${connection.address}"`) || '',
+    (connection.location && `"${connection.location}"`) || ' ',
+    `https://www.linkedin.com/in/${connection.entityUrn}`,
+  ];
+};
+
+// downloads the members as CSV
+export const downloadAsCSV = (data, filename) => {
+  // csvFormat = csvFormat.split(',').join('\n');
+  // const contacts = `Contacts\n${csvFormat}`;
+
+  const connections = data.map((cur) => cur.join(',')).join('\n');
+
+  const blob = new Blob([connections], {
+    type: 'text/csv;charset=utf-8;',
+  });
+
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };

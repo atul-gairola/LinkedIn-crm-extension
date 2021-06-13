@@ -75,7 +75,7 @@ function SendMessage({ showSendMessage, setShowSendMessage }) {
           setShowSendMessage(false);
         } else {
           setLoading(false);
-          toaster.error('Some error occured while sending your message.', {
+          toaster.danger('Some error occured while sending your message.', {
             description:
               "Please try after somtime or inform us about the bug and we'll fix it asap.",
           });
@@ -96,8 +96,6 @@ function SendMessage({ showSendMessage, setShowSendMessage }) {
       setMessage((prev) => (prev += `{{${currentPlaceholder}}} `));
     }
   };
-
-  console.log(showSendMessage);
 
   return (
     <>
@@ -131,8 +129,8 @@ function SendMessage({ showSendMessage, setShowSendMessage }) {
             value={currentPlaceholder.id}
             width={240}
           >
-            {placeholderTypes.map((cur) => (
-              <option value={cur.id}>{capitalizeFirstLetter(cur.label)}</option>
+            {placeholderTypes.map((cur, i) => (
+              <option key={i} value={cur.id}>{capitalizeFirstLetter(cur.label)}</option>
             ))}
           </Select>
           <Button

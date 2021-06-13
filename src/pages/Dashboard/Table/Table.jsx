@@ -25,7 +25,11 @@ import Pagination from './components/Pagination';
 import Sorting from './components/Sorting';
 import Filters from './components/Filters';
 import SendMessage from './components/SendMessage';
-import { formatConnectionDataToRowData } from '../../../utils';
+import {
+  formatConnectionDataToRowData,
+  connectionCSVData,
+  downloadAsCSV,
+} from '../../../utils';
 
 /**
  * @desc React component
@@ -47,10 +51,18 @@ function Table({ user, latestRetConnection }) {
     search: [],
     searchIn: [],
   });
+  const [searchValues, setSearchValues] = useState({
+    fullName: '',
+    company: '',
+    location: '',
+    headline: '',
+  });
+  const [showSendMessage, setShowSendMessage] = useState(false);
+
+  // TODO
   const [selected, setSelected] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [fetchLoading, setFetchLoading] = useState([]);
-  const [showSendMessage, setShowSendMessage] = useState(false);
 
   // -----
 
@@ -229,6 +241,17 @@ function Table({ user, latestRetConnection }) {
 
   const handler = useCallback(debounce(handleSearch, 300), []);
 
+  const searchFilterValues = (e) => {
+    const { name, value } = e.target;
+
+    setSearchValues((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    handler(e);
+  };
+
   // -----
 
   const handleCheckAll = () => {
@@ -237,8 +260,48 @@ function Table({ user, latestRetConnection }) {
   };
 
   const handleVisitProfile = (publicIdentifier) => {
-    // console.log(publicIdentifier);
     chrome.tabs.create({ url: `https://linkedin.com/in/${publicIdentifier}` });
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      search: [],
+      searchIn: [],
+    });
+    setSearchValues({
+      fullName: '',
+      company: '',
+      location: '',
+      headline: '',
+    });
+  };
+
+  const handleDownload = () => {
+    const headers = [
+      'First Name',
+      'Last Name',
+      'Connected At',
+      'Headline',
+      'Company',
+      'Title',
+      'Industry',
+      'Email',
+      'Phone',
+      'Address',
+      'Location',
+      'Profile link',
+    ];
+
+    const dataArr = [headers];
+
+    const connectionCSV = connections.map((cur) => connectionCSVData(cur));
+
+    const finalCSVData = dataArr.concat(connectionCSV);
+
+    downloadAsCSV(
+      finalCSVData,
+      `Connections page_${pagination.currentPage} count_${pagination.count}.csv`
+    );
   };
 
   // Columns for the table
@@ -379,7 +442,11 @@ function Table({ user, latestRetConnection }) {
         setShowSendMessage={setShowSendMessage}
       />
       <Pane marginBottom={20}>
-        <Filters handler={handler} />
+        <Filters
+          searchValues={searchValues}
+          searchFilterValues={searchFilterValues}
+          handleClearFilters={handleClearFilters}
+        />
       </Pane>
       <Pane
         background="#fff"
@@ -406,8 +473,8 @@ function Table({ user, latestRetConnection }) {
             <Sorting sorting={sorting} setSorting={setSorting} />
             <TextInputField
               name="fullName"
-              onChange={(e) => handler(e)}
-              // description="Search"
+              onChange={searchFilterValues}
+              value={searchValues.fullName}
               label="Search"
               width={200}
               marginBottom={2}
@@ -418,6 +485,7 @@ function Table({ user, latestRetConnection }) {
               iconBefore={DownloadIcon}
               appearance="primary"
               marginBottom={4}
+              onClick={handleDownload}
             >
               Download
             </Button>

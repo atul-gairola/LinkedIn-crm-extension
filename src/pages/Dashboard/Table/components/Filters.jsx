@@ -6,7 +6,7 @@ import {
   SmallCrossIcon,
 } from 'evergreen-ui';
 
-function Filters({ handler }) {
+function Filters({ searchFilterValues, handleClearFilters, searchValues }) {
   const [showFilters, setShowFilters] = useState(false);
 
   const toggleShowFilters = () => {
@@ -26,7 +26,11 @@ function Filters({ handler }) {
         >
           Filters
         </Button>
-        <Button iconAfter={SmallCrossIcon} intent="danger">
+        <Button
+          onClick={handleClearFilters}
+          iconAfter={SmallCrossIcon}
+          intent="danger"
+        >
           Clear Filters
         </Button>
       </div>
@@ -34,21 +38,27 @@ function Filters({ handler }) {
         <div className="searchFilterContainer">
           <TextInputField
             name="headline"
-            onChange={(e) => handler(e)}
+            label=""
+            value={searchValues.headline}
+            onChange={searchFilterValues}
             width={200}
             description="Headline"
             placeholder="Search in headline"
           />
           <TextInputField
             name="location"
-            onChange={(e) => handler(e)}
+            onChange={searchFilterValues}
+            label=""
+            value={searchValues.location}
             width={200}
             description="Location"
             placeholder="Search in location"
           />
           <TextInputField
+            label=""
             name="company"
-            onChange={(e) => handler(e)}
+            onChange={searchFilterValues}
+            value={searchValues.company}
             width={200}
             description="Company"
             placeholder="Search in name"

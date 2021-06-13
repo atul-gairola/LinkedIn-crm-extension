@@ -5,10 +5,11 @@ import axios from 'axios';
 import Header from './Header';
 import Table from './Table/Table';
 import Loading from '../../components/Loading';
+import NotLoggedInLinkedIn from './NotLoggedInLinkedIn';
 import { sleep } from '../../utils';
 
 function Dashboard() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [linkedInUser, setLinkedInUser] = useState();
   const [retConnections, setRetConnections] = useState();
   const [latestRetConnection, setLatestRetConnection] = useState();
@@ -17,11 +18,18 @@ function Dashboard() {
     setLoading(true);
 
     chrome.runtime.sendMessage({ action: 'initialize' }, async (response) => {
+      // if the user is not logged into linked in
+      if (response.status === 'failed') {
+        setLoading(false);
+        return;
+      }
+
       const { data } = await axios.post(
         `http://localhost:8000/connections/init`,
         response
       );
       const { user } = data;
+
       // save the user in the storage
       await chrome.storage.sync.set({
         linkedInUser: JSON.stringify(user),
@@ -75,11 +83,11 @@ function Dashboard() {
 
   return (
     <div>
-      {!linkedInUser ? (
+      {loading ? (
         <div style={{ width: '100%', height: '100vh' }}>
-          <Loading />
+          <Loading type="init" />
         </div>
-      ) : (
+      ) : linkedInUser ? (
         <div>
           <Header user={linkedInUser} retConnections={retConnections} />
           <Pane paddingX={30} marginTop={50}>
@@ -96,6 +104,8 @@ function Dashboard() {
             </Text>
           </div>
         </div>
+      ) : (
+        <NotLoggedInLinkedIn />
       )}
     </div>
   );

@@ -25,7 +25,7 @@ const Popup = () => {
       >
         View Connections
       </Button>
-      <Text marginTop={7} >Manage your profesional connections like never before.</Text>
+      <Text marginTop={7} >Manage your professional connections like never before.</Text>
       <Text marginTop={30} size={100} color="muted">{`${
         chrome.runtime.getManifest().name
       } - v${chrome.runtime.getManifest().version}`}</Text>

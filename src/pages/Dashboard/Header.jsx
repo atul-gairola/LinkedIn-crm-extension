@@ -32,7 +32,7 @@ function Header({ user, retConnections }) {
             display="grid"
             gridTemplateColumns="auto auto"
             gridGap={30}
-            aligntItems="center"
+            alignItems="center"
           >
             <Pane>
               <Text whiteSpace="nowrap" size={300}>
@@ -40,7 +40,7 @@ function Header({ user, retConnections }) {
               </Text>
               <br />
               <Tooltip content="Last synced">
-                <Text whiteSpace="nowrap" size={200} fontWeight="bold">
+                <Text whiteSpace="nowrap" size={300} fontWeight="bold">
                   9 / Jun / 2021 5:45 PM
                 </Text>
               </Tooltip>
@@ -50,7 +50,7 @@ function Header({ user, retConnections }) {
                 Updated connections
               </Text>
               <br />
-              <Text whiteSpace="nowrap" size={200} fontWeight="bold">
+              <Text whiteSpace="nowrap" size={300} fontWeight="bold">
                 <Tooltip content="Retrieved connections">
                   <span style={{ color: '#5153ff' }}>{retConnections}</span>
                 </Tooltip>{' '}

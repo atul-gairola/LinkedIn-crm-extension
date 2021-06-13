@@ -1,4 +1,3 @@
-
 // Listener for runtime messages
 chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
   switch (req.action) {
@@ -43,7 +42,7 @@ async function getCsrfToken() {
   if (csrf && csrf.value && csrf.value.startsWith('"')) {
     return csrf.value.slice(1, -1);
   } else {
-    throw new Error('You are not logged into linkedIn. Please login.');
+    return false;
   }
 }
 
@@ -68,6 +67,10 @@ async function fetchLinkedInUrl(
   try {
     if (body) body = JSON.stringify(body);
     const csrfToken = await getCsrfToken();
+
+    if (!csrfToken) {
+      return false;
+    }
 
     const headers = withAcceptHeader
       ? {
@@ -127,6 +130,10 @@ async function getLoggedInUser() {
       'https://www.linkedin.com/voyager/api/identity/profiles/me',
       true
     );
+
+    if (!resp) {
+      return resp;
+    }
 
     const result = {
       firstName: resp.firstName,
@@ -251,9 +258,15 @@ async function getPaginatedOwnContacts(count = 10, start = 0) {
 
 async function getProfileContactInfo(profileId) {
   try {
-    const { data } = await fetchLinkedInUrl(
+    const resp = await fetchLinkedInUrl(
       `https://www.linkedin.com/voyager/api/identity/profiles/${profileId}/profileContactInfo`
     );
+
+    if (!resp) {
+      return resp;
+    }
+
+    const { data } = resp;
 
     const result = {
       address: data.address && data.address,
@@ -284,6 +297,10 @@ async function getProfileView(profileIdentifier) {
       `https://www.linkedin.com/voyager/api/identity/profiles/${profileIdentifier}/profileView`,
       true
     );
+
+    if (!response) {
+      return response;
+    }
 
     const { profile, positionView } = response;
 
@@ -322,6 +339,10 @@ async function getProfileView(profileIdentifier) {
  */
 async function initialize(sendResponse) {
   const loggedInUser = await getLoggedInUser();
+  if (!loggedInUser) {
+    sendNotLoggedInResponse(sendResponse);
+    return;
+  }
   const allContacts = await getAllOwnContacts();
   sendResponse({
     userDetails: loggedInUser,
@@ -333,6 +354,9 @@ async function initialize(sendResponse) {
 
 async function getCompleteProfileData(profileId, publicIdentifier) {
   const contactInfo = await getProfileContactInfo(profileId);
+  if (!contactInfo) {
+    return contactInfo;
+  }
   sleep(500);
   const profileView = await getProfileView(publicIdentifier);
 
@@ -353,7 +377,10 @@ async function getCompleteProfileData(profileId, publicIdentifier) {
 
 async function updateConnection(profileId, publicIdentifier, sendResponse) {
   const data = await getCompleteProfileData(profileId, publicIdentifier);
-
+  if (!data) {
+    sendNotLoggedInResponse(sendResponse);
+    return;
+  }
   sendResponse({
     ...data,
   });
@@ -362,37 +389,31 @@ async function updateConnection(profileId, publicIdentifier, sendResponse) {
 // -----------------
 
 async function getNextUpdate() {
-  await sleep(5000);
-
-  // get the next connection to update
-  const res = await fetch('http://localhost:8000/connections/update/next', {
-    method: 'GET',
-  });
-  const data = await res.json();
-  const { next } = data;
-
-  // if no next connection return
-  if (!next) {
-    chrome.runtime.sendMessage({ message: 'collected_all' }, () => {});
-    return;
-  }
-
-  const profileId =
-    next.profileId || next.entityUrn.replace('urn:li:fsd_profile:', '');
-
-  // get the complete data
-  let profileData = await getCompleteProfileData(
-    profileId,
-    next.publicIdentifier
-  );
-
-  await sleep(3000);
-
-  // send the data to dashboard
-  chrome.runtime.sendMessage(
-    { message: 'next_data', updateData: profileData },
-    () => {}
-  );
+  // await sleep(5000);
+  // // get the next connection to update
+  // const res = await fetch('http://localhost:8000/connections/update/next', {
+  //   method: 'GET',
+  // });
+  // const data = await res.json();
+  // const { next } = data;
+  // // if no next connection return
+  // if (!next) {
+  //   chrome.runtime.sendMessage({ message: 'collected_all' }, () => {});
+  //   return;
+  // }
+  // const profileId =
+  //   next.profileId || next.entityUrn.replace('urn:li:fsd_profile:', '');
+  // // get the complete data
+  // let profileData = await getCompleteProfileData(
+  //   profileId,
+  //   next.publicIdentifier
+  // );
+  // await sleep(3000);
+  // // send the data to dashboard
+  // chrome.runtime.sendMessage(
+  //   { message: 'next_data', updateData: profileData },
+  //   () => {}
+  // );
 }
 
 async function sendMessage(req, sendResponse) {
@@ -406,6 +427,11 @@ async function sendMessage(req, sendResponse) {
         messagePayload,
         { action: 'create' }
       );
+
+      if (!data) {
+        sendNotLoggedInResponse(sendResponse);
+        return data;
+      }
 
       sendResponse({
         status: 'success',
@@ -423,4 +449,11 @@ async function sendMessage(req, sendResponse) {
   } else {
     sendResponse({ status: 'error', message: 'Message payload is empty.' });
   }
+}
+
+function sendNotLoggedInResponse(sendResponse) {
+  sendResponse({
+    status: 'failed',
+    reason: 'You are not logged into linked. Please login to continue',
+  });
 }
