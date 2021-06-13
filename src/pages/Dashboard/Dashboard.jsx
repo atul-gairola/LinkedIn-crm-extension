@@ -24,7 +24,8 @@ function Dashboard() {
       }
 
       const { data } = await axios.post(
-        `http://localhost:8000/connections/init`,
+        // `http://localhost:8000/connections/init`,
+        `http://159.65.146.74:8000/connections/init`,
         response
       );
       const { user } = data;
