@@ -23,7 +23,7 @@ import axios from 'axios';
 import './Table.css';
 import Pagination from './components/Pagination';
 import Sorting from './components/Sorting';
-import Filters from './components/Filters';
+// import Filters from './components/Filters';
 import SendMessage from './components/SendMessage';
 import {
   formatConnectionDataToRowData,
@@ -47,16 +47,10 @@ function Table({ user, setRetConnections }) {
   });
   const [totalResults, setTotalResults] = useState(0);
   const [sorting, setSorting] = useState('connectedAt_desc');
-  const [filters, setFilters] = useState({
-    search: [],
-    searchIn: [],
-  });
-  const [searchValues, setSearchValues] = useState({
-    fullName: '',
-    company: '',
-    location: '',
-    headline: '',
-  });
+
+  const [inputSearch, setInputSearch] = useState('');
+  const [fetchSearch, setFetchSearch] = useState('');
+
   const [showSendMessage, setShowSendMessage] = useState(false);
 
   // TODO
@@ -82,16 +76,11 @@ function Table({ user, setRetConnections }) {
     count,
     sortBy,
     sortOrder,
-    searchIn,
-    search
+    fetchSearch
   ) {
     let searchUrl = ``;
-    if (searchIn.length === 0) {
-      searchUrl = `&searchIn=&search=`;
-    } else {
-      searchIn.forEach((cur, i) => {
-        searchUrl += `&searchIn=${cur}&search=${search[i]}`;
-      });
+    if (fetchSearch !== '') {
+      searchUrl = `&search=${fetchSearch}`;
     }
     const { data } = await axios.get(
       `/connections?start=${start}&count=${count}&sortBy=${sortBy}&sortOrder=${sortOrder}${searchUrl}`,
@@ -120,8 +109,7 @@ function Table({ user, setRetConnections }) {
       pagination.count,
       sorting.split('_')[0],
       sorting.split('_')[1] === 'asc' ? 1 : -1,
-      filters.searchIn,
-      filters.search
+      fetchSearch
     );
     const connectionsArr = data.connections.map((cur) =>
       formatConnectionDataToRowData(cur)
@@ -143,7 +131,7 @@ function Table({ user, setRetConnections }) {
   // runs when any of the following state changes
   useEffect(() => {
     fetchData();
-  }, [pagination, sorting, filters]);
+  }, [pagination, sorting, fetchSearch]);
 
   // HANDLERS
 
@@ -200,50 +188,16 @@ function Table({ user, setRetConnections }) {
     );
   };
 
-  /**
-   * @desc Set searchIn and search in filters state
-   * @param {Object} [e] The event object in js click
-   */
-
-  const handleSearch = (e) => {
-    const { value, name } = e.target;
-    setFilters((prev) => {
-      let searchIn =
-        value === '' ? [...prev.searchIn] : [...prev.searchIn, name];
-      let search = value === '' ? [...prev.search] : [...prev.search, value];
-
-      if (value === '') {
-        const index = searchIn.indexOf(name);
-        if (index !== -1) {
-          searchIn = [...prev.searchIn];
-          searchIn.splice(index, 1);
-          search = [...prev.search];
-          search.splice(index, 1);
-        }
-      } else {
-        const index = prev.searchIn.indexOf(name);
-        if (index !== -1) {
-          searchIn = [...prev.searchIn];
-          const searchArr = [...prev.search];
-          searchArr[index] = value;
-          search = searchArr;
-        }
-      }
-
-      return { ...prev, searchIn: searchIn, search: search };
-    });
+  const handleFetchSearch = (e) => {
+    const { value } = e.target;
+    setFetchSearch(value);
   };
 
-  const handler = useCallback(debounce(handleSearch, 300), []);
+  const handler = useCallback(debounce(handleFetchSearch, 300), []);
 
-  const searchFilterValues = (e) => {
-    const { name, value } = e.target;
-
-    setSearchValues((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
+  const handleInputSearch = (e) => {
+    const { value } = e.target;
+    setInputSearch(value);
     handler(e);
   };
 
@@ -256,19 +210,6 @@ function Table({ user, setRetConnections }) {
 
   const handleVisitProfile = (publicIdentifier) => {
     chrome.tabs.create({ url: `https://linkedin.com/in/${publicIdentifier}` });
-  };
-
-  const handleClearFilters = () => {
-    setFilters({
-      search: [],
-      searchIn: [],
-    });
-    setSearchValues({
-      fullName: '',
-      company: '',
-      location: '',
-      headline: '',
-    });
   };
 
   const handleDownload = () => {
@@ -435,13 +376,13 @@ function Table({ user, setRetConnections }) {
         showSendMessage={showSendMessage}
         setShowSendMessage={setShowSendMessage}
       />
-      <Pane marginBottom={20}>
+      {/* <Pane marginBottom={20}>
         <Filters
           searchValues={searchValues}
           searchFilterValues={searchFilterValues}
           handleClearFilters={handleClearFilters}
         />
-      </Pane>
+      </Pane> */}
       <Pane
         background="#fff"
         boxShadow="0px 4px 20px rgba(0, 0, 0, 0.06)"
@@ -466,13 +407,13 @@ function Table({ user, setRetConnections }) {
           >
             <Sorting sorting={sorting} setSorting={setSorting} />
             <TextInputField
-              name="fullName"
-              onChange={searchFilterValues}
-              value={searchValues.fullName}
+              name="search"
+              onChange={handleInputSearch}
+              value={inputSearch}
               label="Search"
               width={200}
               marginBottom={2}
-              placeholder="Search in name"
+              placeholder="Search in name, headline, company, location and industry"
             />
             <Button
               maxWidth={100}
