@@ -29,18 +29,7 @@ function Dashboard() {
       );
       const { user } = data;
 
-      // save the user in the storage
-      await chrome.storage.sync.set({
-        linkedInUser: JSON.stringify(user),
-      });
-
-      await chrome.storage.sync.set({
-        totalConnections: user.totalConnections,
-      });
-
-      await chrome.storage.sync.set({
-        retrievedConnections: user.retrievedConnections,
-      });
+      console.log(user);
 
       setLinkedInUser(user);
       setRetConnections(user.retrievedConnections);

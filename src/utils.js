@@ -3,7 +3,7 @@ export function formatTimeStamp(timestamp) {
     return '';
   }
   const dateObj = new Date(timestamp);
-  const date = dateObj.getDay();
+  const date = dateObj.getDate();
   const months = [
     'Jan',
     'Feb',
@@ -20,14 +20,20 @@ export function formatTimeStamp(timestamp) {
   ];
   const month = months[dateObj.getMonth()];
   const year = dateObj.getFullYear();
+  const min = dateObj.getMinutes();
+  const hour = dateObj.getHours();
+  const sec = dateObj.getSeconds();
 
-  return `${date} / ${month} / ${year}`;
+  return {
+    date: `${date} / ${month} / ${year}`,
+    time: `${hour}:${min}:${sec}`,
+  };
 }
 
 export function formatConnectionDataToRowData(connection) {
   return {
     fullName: connection.fullName || '',
-    connectedAt: formatTimeStamp(connection.connectedAt) || '',
+    connectedAt: formatTimeStamp(connection.connectedAt).date || '',
     headline: connection.headline || '',
     company: connection.company || '',
     companyTitle: connection.companyTitle || '',

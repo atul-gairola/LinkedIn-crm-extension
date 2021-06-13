@@ -3,9 +3,10 @@ import { Avatar, Pane, Heading, Text, Tooltip } from 'evergreen-ui';
 
 import './Header.css';
 import logo from '../../assets/img/icon.svg';
+import { formatTimeStamp } from '../../utils';
 
 function Header({ user, retConnections }) {
-  const { fullName, profilePicture, totalConnections } = user;
+  const { fullName, profilePicture, totalConnections, lastSync } = user;
 
   return (
     <header>
@@ -41,7 +42,9 @@ function Header({ user, retConnections }) {
               <br />
               <Tooltip content="Last synced">
                 <Text whiteSpace="nowrap" size={300} fontWeight="bold">
-                  9 / Jun / 2021 5:45 PM
+                  {formatTimeStamp(new Date(lastSync)).date +
+                    ' ' +
+                    formatTimeStamp(new Date(lastSync)).time}
                 </Text>
               </Tooltip>
             </Pane>
