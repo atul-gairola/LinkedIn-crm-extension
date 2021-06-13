@@ -23,11 +23,12 @@ function Dashboard() {
         return;
       }
 
-      const { data } = await axios.post(
-        // `http://localhost:8000/connections/init`,
-        `http://159.65.146.74:8000/connections/init`,
-        response
-      );
+      // for dev
+      axios.defaults.baseURL = `http://localhost:8000`;
+      // for prod
+      // axios.defaults.baseURL = 'http://159.65.146.74:8000';
+
+      const { data } = await axios.post('/connections/init', response);
       const { user } = data;
 
       console.log(user);

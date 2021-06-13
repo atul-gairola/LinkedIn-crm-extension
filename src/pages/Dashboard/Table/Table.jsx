@@ -94,8 +94,7 @@ function Table({ user, setRetConnections }) {
       });
     }
     const { data } = await axios.get(
-      // `http://localhost:8000/connections?start=${start}&count=${count}&sortBy=${sortBy}&sortOrder=${sortOrder}${searchUrl}`,
-      `http://159.65.146.74:8000/connections?start=${start}&count=${count}&sortBy=${sortBy}&sortOrder=${sortOrder}${searchUrl}`,
+      `/connections?start=${start}&count=${count}&sortBy=${sortBy}&sortOrder=${sortOrder}${searchUrl}`,
 
       {
         headers: {
@@ -170,8 +169,7 @@ function Table({ user, setRetConnections }) {
       },
       async (res) => {
         const { data: result } = await axios.patch(
-          // `http://localhost:8000/connections/update/${entityUrn}`,
-          `http://159.65.146.74:8000/connections/update/${entityUrn}`,
+          `/connections/update/${entityUrn}`,
 
           res,
           {
