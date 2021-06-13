@@ -96,7 +96,7 @@ async function fetchLinkedInUrl(
       url += `?${paramStr}`;
     }
 
-    console.log(url);
+    // console.log(url);
 
     const res = await fetch(url, {
       method: method,

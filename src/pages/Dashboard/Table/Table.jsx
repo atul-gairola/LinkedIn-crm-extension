@@ -37,7 +37,7 @@ import {
  * @returns Table component
  */
 
-function Table({ user, latestRetConnection }) {
+function Table({ user, setRetConnections }) {
   // STATES
   const [loading, setLoading] = useState(false);
   const [connections, setConnections] = useState([]);
@@ -125,7 +125,6 @@ function Table({ user, latestRetConnection }) {
     const connectionsArr = data.connections.map((cur) =>
       formatConnectionDataToRowData(cur)
     );
-    console.log(meta);
     setTotalResults(meta.totalResults);
     setConnections(connectionsArr);
     setSelected(connectionsArr.map((cur) => false));
@@ -144,12 +143,6 @@ function Table({ user, latestRetConnection }) {
   useEffect(() => {
     fetchData();
   }, [pagination, sorting, filters]);
-
-  // runs when latest retrieved connection gets updated
-  useEffect(() => {
-    console.log(latestRetConnection);
-    console.log(connections);
-  }, [latestRetConnection]);
 
   // HANDLERS
 
@@ -186,7 +179,8 @@ function Table({ user, latestRetConnection }) {
 
         const { data, meta } = result;
 
-        console.log(data);
+        // update state
+        setRetConnections(meta.retrieved);
 
         setConnections((prev) => {
           const copy = [...prev];
@@ -195,7 +189,6 @@ function Table({ user, latestRetConnection }) {
           );
           return copy;
         });
-        console.log(fetchLoading);
         setFetchLoading((prev) => {
           const arr = [...prev];
           arr[cell.row.id] = false;
@@ -389,7 +382,6 @@ function Table({ user, latestRetConnection }) {
         Header: 'Actions',
         accessor: 'actions',
         Cell: ({ cell }) => {
-          // console.log(cell);
           const { original } = cell.row;
           return (
             <Popover

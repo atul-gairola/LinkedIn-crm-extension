@@ -12,7 +12,6 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [linkedInUser, setLinkedInUser] = useState();
   const [retConnections, setRetConnections] = useState();
-  const [latestRetConnection, setLatestRetConnection] = useState();
 
   useEffect(() => {
     setLoading(true);
@@ -49,37 +48,36 @@ function Dashboard() {
     });
   }, []);
 
-  useEffect(() => {
-    console.log('Running task');
-    chrome.runtime.sendMessage({ action: 'getNextUpdate' }, () => {});
+  // useEffect(() => {
+  //   chrome.runtime.sendMessage({ action: 'getNextUpdate' }, () => {});
 
-    const updateConnection = async (req, sender, sendResponse) => {
-      if (req.message === 'next_data') {
-        const { updateData } = req;
-        const { data: result } = await axios.patch(
-          `http://localhost:8000/connections/update/${updateData.entityUrn.replace(
-            'fs_',
-            'fsd_'
-          )}`,
-          updateData,
-          {
-            headers: linkedInUser._id,
-          }
-        );
+  //   const updateConnection = async (req, sender, sendResponse) => {
+  //     if (req.message === 'next_data') {
+  //       const { updateData } = req;
+  //       const { data: result } = await axios.patch(
+  //         `http://localhost:8000/connections/update/${updateData.entityUrn.replace(
+  //           'fs_',
+  //           'fsd_'
+  //         )}`,
+  //         updateData,
+  //         {
+  //           headers: linkedInUser._id,
+  //         }
+  //       );
 
-        console.log('Updated Data: ', result);
-        await sleep(3000);
-        chrome.runtime.sendMessage({ action: 'getNextUpdate' }, () => {});
-      } else if (req.message === 'collected_all') {
-        console.log('Collected all');
-        return;
-      }
-    };
+  //       console.log('Updated Data: ', result);
+  //       await sleep(3000);
+  //       chrome.runtime.sendMessage({ action: 'getNextUpdate' }, () => {});
+  //     } else if (req.message === 'collected_all') {
+  //       console.log('Collected all');
+  //       return;
+  //     }
+  //   };
 
-    chrome.runtime.onMessage.addListener(updateConnection);
+  //   chrome.runtime.onMessage.addListener(updateConnection);
 
-    return chrome.runtime.onMessage.removeListener(updateConnection);
-  }, [linkedInUser]);
+  //   return chrome.runtime.onMessage.removeListener(updateConnection);
+  // }, [linkedInUser]);
 
   return (
     <div>
@@ -91,11 +89,7 @@ function Dashboard() {
         <div>
           <Header user={linkedInUser} retConnections={retConnections} />
           <Pane paddingX={30} marginTop={50}>
-            <Table
-              user={linkedInUser}
-              retConnections={retConnections}
-              latestRetConnection={latestRetConnection}
-            />
+            <Table user={linkedInUser} setRetConnections={setRetConnections} />
           </Pane>
           <div style={{ textAlign: 'center', marginBottom: 20 }}>
             <Text>
