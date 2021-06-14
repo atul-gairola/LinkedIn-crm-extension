@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useTable, useSortBy } from 'react-table';
+import { useTable, useSortBy, useRowSelect } from 'react-table';
 import {
   Pane,
   Checkbox,
@@ -21,6 +21,7 @@ import {
   CaretUpIcon,
   toaster,
   Dialog,
+  Tooltip,
 } from 'evergreen-ui';
 import { debounce } from 'debounce';
 import axios from 'axios';
@@ -62,8 +63,6 @@ function Table({ user, setRetConnections }) {
   const [toDisconnect, setToDisconnect] = useState();
 
   // TODO
-  const [selected, setSelected] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
   const [fetchLoading, setFetchLoading] = useState([]);
 
   // -----
@@ -124,7 +123,6 @@ function Table({ user, setRetConnections }) {
     );
     setTotalResults(meta.totalResults);
     setConnections(connectionsArr);
-    setSelected(connectionsArr.map((cur) => false));
     setFetchLoading(connectionsArr.map((cur) => false));
     setLoading(false);
   };
@@ -210,11 +208,6 @@ function Table({ user, setRetConnections }) {
   };
 
   // -----
-
-  const handleCheckAll = () => {
-    setSelectAll(true);
-    setSelected((prev) => prev.map(() => true));
-  };
 
   const handleVisitProfile = (publicIdentifier) => {
     chrome.tabs.create({ url: `https://linkedin.com/in/${publicIdentifier}` });
@@ -302,22 +295,20 @@ function Table({ user, setRetConnections }) {
   const columns = React.useMemo(
     () => [
       {
-        Header: (
-          <Checkbox
-            borderColor="#5153ff"
-            checked={selectAll}
-            onChange={handleCheckAll}
-          />
-        ),
+        Header: ({ getToggleAllRowsSelectedProps }) => {
+          return (
+            <Checkbox
+              // display="inline"
+              // marginY={5}
+              {...getToggleAllRowsSelectedProps()}
+            />
+          );
+        },
         disableSortBy: true,
         accessor: 'check',
-        Cell: (row) => (
-          <Checkbox
-            borderColor="#5153ff"
-            checked={selected[row.index]}
-            onChange={(e) => setSelected(e.target.checked)}
-          />
-        ),
+        Cell: ({ row }) => {
+          return <Checkbox {...row.getToggleRowSelectedProps()} />;
+        },
         className: 'checkboxCell',
       },
       {
@@ -481,7 +472,7 @@ function Table({ user, setRetConnections }) {
     headerGroups,
     rows,
     prepareRow,
-    state: { sortBy },
+    state: { sortBy, selectedRowIds },
   } = useTable(
     {
       columns,
@@ -489,7 +480,8 @@ function Table({ user, setRetConnections }) {
       disableMultiSort: true,
       manualSortBy: true,
     },
-    useSortBy
+    useSortBy,
+    useRowSelect
   );
 
   useEffect(() => {
@@ -501,6 +493,7 @@ function Table({ user, setRetConnections }) {
       setSorting('connectedAt_desc');
     }
   }, [sortBy]);
+
 
   return (
     <Pane>
@@ -590,10 +583,11 @@ function Table({ user, setRetConnections }) {
                 <tr {...headerGroup.getHeaderGroupProps()}>
                   {headerGroup.headers.map((column, i) => (
                     <th
-                      style={i === 0 ? { paddingLeft: '15px' } : {}}
                       {...column.getHeaderProps(column.getSortByToggleProps())}
                     >
-                      {column.render('Header')}
+                      {i === 0 && Object.keys(selectedRowIds).length > 0
+                        ? null
+                        : column.render('Header')}
                       {column.isSorted ? (
                         column.isSortedDesc ? (
                           <span style={{ marginLeft: 5 }}>
@@ -604,6 +598,94 @@ function Table({ user, setRetConnections }) {
                             <CaretUpIcon transform="translateY(3px)" />
                           </span>
                         )
+                      ) : null}
+                      {i === 0 && Object.keys(selectedRowIds).length > 0 ? (
+                        <div
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr 1fr',
+                            alignItems: 'center',
+                            paddingLeft: 5,
+                            gridGap: 5,
+                          }}
+                        >
+                          <span>{column.render('Header')}</span>
+                          <span style={{ marginLeft: 5, display: 'inline' }}>
+                            {' '}
+                            {Object.keys(selectedRowIds).length}{' '}
+                          </span>
+                          <Popover
+                            position={Position.BOTTOM_LEFT}
+                            content={({ close }) => (
+                              <Menu>
+                                <Menu.Group>
+                                  <Menu.Item
+                                    onSelect={() => {
+                                      // setShowSendMessage(original)
+                                      console.log(rows);
+                                    }}
+                                    disabled={
+                                      Object.keys(selectedRowIds).length > 25
+                                        ? true
+                                        : false
+                                    }
+                                    color={
+                                      Object.keys(selectedRowIds).length > 25
+                                        ? 'rgba(0,0,0,.4)'
+                                        : ''
+                                    }
+                                    icon={ChatIcon}
+                                  >
+                                    Message
+                                  </Menu.Item>
+                                  <Menu.Item
+                                    // onSelect={() => {
+                                    //   setShowDisconnect(true);
+                                    //   setToDisconnect({
+                                    //     profileId: original.profileId,
+                                    //     entityUrn: original.entityUrn,
+                                    //     fullName: original.fullName,
+                                    //   });
+                                    // }}
+                                    icon={DisableIcon}
+                                  >
+                                    Disconnect
+                                  </Menu.Item>
+                                  <Menu.Item
+                                    // onSelect={() =>
+                                    //   handleFollow(
+                                    //     original.publicIdentifier,
+                                    //     'followConnection',
+                                    //     original.firstName
+                                    //   )
+                                    // }
+                                    icon={FollowingIcon}
+                                  >
+                                    Follow
+                                  </Menu.Item>
+                                  <Menu.Item
+                                    // onSelect={() =>
+                                    //   handleFollow(
+                                    //     original.publicIdentifier,
+                                    //     'unfollowConnection',
+                                    //     original.firstName
+                                    //   )
+                                    // }
+                                    icon={FollowerIcon}
+                                  >
+                                    Unfollow
+                                  </Menu.Item>
+                                </Menu.Group>
+                              </Menu>
+                            )}
+                          >
+                            <MoreIcon
+                              cursor="pointer"
+                              marginX="auto"
+                              marginLeft={5}
+                            />
+                          </Popover>
+                        </div>
                       ) : null}
                     </th>
                   ))}
