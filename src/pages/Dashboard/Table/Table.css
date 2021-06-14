@@ -97,3 +97,7 @@ td {
 .hide {
   display: none;
 }
+
+.profilePictureCell{
+  min-width: 0;
+}

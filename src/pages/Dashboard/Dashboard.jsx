@@ -37,9 +37,11 @@ function Dashboard() {
               }));
             } catch (e) {
               console.log(e);
-              toaster.warning('Error in collecting', {
-                duration: 6,
-              });
+              if (!(e.response && e.response.status === 409)) {
+                toaster.warning('Error in collecting', {
+                  duration: 6,
+                });
+              }
             }
           }
         }

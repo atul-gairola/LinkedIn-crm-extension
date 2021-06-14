@@ -54,6 +54,7 @@ export function formatConnectionDataToRowData(connection) {
     firstName: connection.firstName || '',
     lastName: connection.lastName || '',
     emailAddress: connection.contact.emailAddress || '',
+    profilePicture: connection.profilePicture || '',
     phoneNumber:
       (connection.contact.phoneNumbers && connection.contact.phoneNumbers[0]) ||
       '',

@@ -16,6 +16,7 @@ import {
   FollowingIcon,
   FollowerIcon,
   Position,
+  Avatar,
 } from 'evergreen-ui';
 import { debounce } from 'debounce';
 import axios from 'axios';
@@ -23,7 +24,6 @@ import axios from 'axios';
 import './Table.css';
 import Pagination from './components/Pagination';
 import Sorting from './components/Sorting';
-// import Filters from './components/Filters';
 import SendMessage from './components/SendMessage';
 import {
   formatConnectionDataToRowData,
@@ -260,6 +260,20 @@ function Table({ user, setRetConnections }) {
           />
         ),
         className: 'checkboxCell',
+      },
+      {
+        Header: '',
+        accessor: 'profilePicture',
+        className: 'profilePictureCell',
+        Cell: (row) => {
+          return (
+            <Avatar
+              src={row.value}
+              size={30}
+              name={row.cell.row.original.fullName}
+            />
+          );
+        },
       },
       {
         Header: 'Name',
