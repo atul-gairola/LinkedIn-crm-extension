@@ -17,6 +17,8 @@ import {
   FollowerIcon,
   Position,
   Avatar,
+  CaretDownIcon,
+  CaretUpIcon,
 } from 'evergreen-ui';
 import { debounce } from 'debounce';
 import axios from 'axios';
@@ -25,6 +27,7 @@ import './Table.css';
 import Pagination from './components/Pagination';
 import Sorting from './components/Sorting';
 import SendMessage from './components/SendMessage';
+import Loading from '../../../components/Loading';
 import {
   formatConnectionDataToRowData,
   connectionCSVData,
@@ -251,6 +254,7 @@ function Table({ user, setRetConnections }) {
             onChange={handleCheckAll}
           />
         ),
+        disableSortBy: true,
         accessor: 'check',
         Cell: (row) => (
           <Checkbox
@@ -263,6 +267,7 @@ function Table({ user, setRetConnections }) {
       },
       {
         Header: '',
+        disableSortBy: true,
         accessor: 'profilePicture',
         className: 'profilePictureCell',
         Cell: (row) => {
@@ -306,18 +311,20 @@ function Table({ user, setRetConnections }) {
         className: 'companyTitleCell',
       },
       {
-        Header: 'Contact Info',
-        accessor: 'contact',
-        className: 'contactInfoCell',
-      },
-      {
         Header: 'Industry',
         accessor: 'industry',
         className: 'industryCell',
       },
       {
+        Header: 'Contact Info',
+        accessor: 'contact',
+        disableSortBy: true,
+        className: 'contactInfoCell',
+      },
+      {
         Header: 'Fetch info',
         accessor: 'fetch',
+        disableSortBy: true,
         Cell: (row) => {
           return (
             <Button
@@ -338,6 +345,7 @@ function Table({ user, setRetConnections }) {
       {
         Header: 'Actions',
         accessor: 'actions',
+        disableSortBy: true,
         Cell: ({ cell }) => {
           const { original } = cell.row;
           return (
@@ -378,15 +386,32 @@ function Table({ user, setRetConnections }) {
     []
   );
 
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-    useTable(
-      {
-        columns,
-        data: connections,
-        disableMultiSort: true,
-      },
-      useSortBy
-    );
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+    state: { sortBy },
+  } = useTable(
+    {
+      columns,
+      data: connections,
+      disableMultiSort: true,
+      manualSortBy: true,
+    },
+    useSortBy
+  );
+
+  useEffect(() => {
+    console.log('Table state: ', sortBy);
+    if (sortBy.length > 0) {
+      const { id, desc } = sortBy[0];
+      desc ? setSorting(`${id}_desc`) : setSorting(`${id}_asc`);
+    } else {
+      setSorting('connectedAt_desc');
+    }
+  }, [sortBy]);
 
   return (
     <Pane>
@@ -418,12 +443,12 @@ function Table({ user, setRetConnections }) {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '160px 200px auto',
+              gridTemplateColumns: '200px auto',
               alignItems: 'end',
               gridGap: '30px',
             }}
           >
-            <Sorting sorting={sorting} setSorting={setSorting} />
+            {/* <Sorting sorting={sorting} setSorting={setSorting} /> */}
             <TextInputField
               name="search"
               onChange={handleInputSearch}
@@ -452,6 +477,11 @@ function Table({ user, setRetConnections }) {
           </Pane>
         </div>
         <div className="tableContainer">
+          {loading && (
+            <div className="tableLoadingContainer">
+              <Loading />
+            </div>
+          )}
           <table {...getTableProps()} className="table">
             <thead className="tableHeader">
               {headerGroups.map((headerGroup) => (
@@ -462,6 +492,17 @@ function Table({ user, setRetConnections }) {
                       {...column.getHeaderProps(column.getSortByToggleProps())}
                     >
                       {column.render('Header')}
+                      {column.isSorted ? (
+                        column.isSortedDesc ? (
+                          <span style={{ marginLeft: 5 }}>
+                            <CaretDownIcon transform="translateY(3px)" />
+                          </span>
+                        ) : (
+                          <span style={{ marginLeft: 5 }}>
+                            <CaretUpIcon transform="translateY(3px)" />
+                          </span>
+                        )
+                      ) : null}
                     </th>
                   ))}
                 </tr>
