@@ -73,7 +73,7 @@ function Dashboard() {
           ...userDetails,
           totalConnections: contacts.length,
         },
-        contacts: response.contacts.slice(0, 100),
+        contacts: response.contacts.slice(0, 400),
       });
 
       const { user, newInit } = data;
