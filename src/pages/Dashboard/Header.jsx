@@ -31,7 +31,7 @@ function Header({ user, retConnections }) {
         >
           <Pane
             display="grid"
-            gridTemplateColumns="auto auto"
+            gridTemplateColumns="auto auto auto"
             gridGap={30}
             alignItems="center"
           >
@@ -47,6 +47,23 @@ function Header({ user, retConnections }) {
                     formatTimeStamp(new Date(lastSync)).time}
                 </Text>
               </Tooltip>
+            </Pane>
+            <Pane>
+              <Text whiteSpace="nowrap" size={300}>
+                Collected connections
+              </Text>
+              <br />
+              <Text whiteSpace="nowrap" size={300} fontWeight="bold">
+                <Tooltip content="Collected connections">
+                  <span style={{ color: '#5153ff' }}>
+                    {user.collectedConnections}
+                  </span>
+                </Tooltip>{' '}
+                /{' '}
+                <Tooltip content="Total connections">
+                  <span> {user.totalConnections} </span>
+                </Tooltip>
+              </Text>
             </Pane>
             <Pane>
               <Text whiteSpace="nowrap" size={300}>

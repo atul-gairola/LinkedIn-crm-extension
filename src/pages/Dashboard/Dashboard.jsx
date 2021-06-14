@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Pane, Text } from 'evergreen-ui';
+import { Pane, Text, toaster } from 'evergreen-ui';
 import axios from 'axios';
 
 import Header from './Header';
@@ -13,9 +13,51 @@ function Dashboard() {
   const [linkedInUser, setLinkedInUser] = useState();
   const [retConnections, setRetConnections] = useState();
 
-  useEffect(() => {
-    setLoading(true);
+  function collectConnections(collected, total, user) {
+    chrome.runtime.sendMessage(
+      { action: 'getConnections', collected, total },
+      async (res) => {
+        const { connections } = res;
+        for (let i = 0; i < connections.length; i++) {
+          if (connections[i]) {
+            try {
+              await sleep(500);
+              const { data } = await axios.post(
+                `/connections/`,
+                { connection: connections[i] },
+                {
+                  headers: {
+                    liuser: user._id,
+                  },
+                }
+              );
+              setLinkedInUser((prev) => ({
+                ...prev,
+                collectedConnections: prev.collectedConnections + 1,
+              }));
+            } catch (e) {
+              console.log(e);
+              toaster.warning('Error in collecting', {
+                duration: 6,
+              });
+            }
+          }
+        }
 
+        toaster.success('Collected all connections', {
+          description: 'Please refresh the page to view them',
+          duration: 6,
+        });
+      }
+    );
+  }
+
+  useEffect(() => {
+    // for dev
+    axios.defaults.baseURL = `http://localhost:8000`;
+    // for prod
+    // axios.defaults.baseURL = 'http://159.65.146.74:8000';
+    setLoading(true);
     chrome.runtime.sendMessage({ action: 'initialize' }, async (response) => {
       // if the user is not logged into linked in
       if (response.status === 'failed') {
@@ -23,19 +65,34 @@ function Dashboard() {
         return;
       }
 
-      // for dev
-      axios.defaults.baseURL = `http://localhost:8000`;
-      // for prod
-      // axios.defaults.baseURL = 'http://159.65.146.74:8000';
+      const { userDetails, contacts } = response;
+      const { data } = await axios.post('/connections/init', {
+        userDetails: {
+          ...userDetails,
+          totalConnections: contacts.length,
+        },
+        contacts: response.contacts.slice(0, 100),
+      });
 
-      const { data } = await axios.post('/connections/init', response);
-      const { user } = data;
+      const { user, newInit } = data;
 
-      console.log(user);
+      console.log('User: ', user);
 
       setLinkedInUser(user);
       setRetConnections(user.retrievedConnections);
       setLoading(false);
+
+      const { collectedConnections, totalConnections } = user;
+
+      // if all collections are not collected
+      if (collectedConnections !== totalConnections) {
+        console.log('Connections to collect');
+        // collect rest connections
+        collectConnections(collectedConnections, totalConnections, user);
+      } else {
+        console.log('All connections collected');
+        // start updating connections
+      }
     });
   }, []);
 

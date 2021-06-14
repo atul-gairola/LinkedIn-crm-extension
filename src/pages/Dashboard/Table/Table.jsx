@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useTable } from 'react-table';
+import { useTable, useSortBy } from 'react-table';
 import {
   Pane,
   Checkbox,
@@ -365,10 +365,14 @@ function Table({ user, setRetConnections }) {
   );
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-    useTable({
-      columns,
-      data: connections,
-    });
+    useTable(
+      {
+        columns,
+        data: connections,
+        disableMultiSort: true,
+      },
+      useSortBy
+    );
 
   return (
     <Pane>
@@ -413,7 +417,7 @@ function Table({ user, setRetConnections }) {
               label="Search"
               width={200}
               marginBottom={2}
-              placeholder="Search in name, headline, company, location and industry"
+              placeholder="Search in all columns"
             />
             <Button
               maxWidth={100}
@@ -441,7 +445,7 @@ function Table({ user, setRetConnections }) {
                   {headerGroup.headers.map((column, i) => (
                     <th
                       style={i === 0 ? { paddingLeft: '15px' } : {}}
-                      {...column.getHeaderProps()}
+                      {...column.getHeaderProps(column.getSortByToggleProps())}
                     >
                       {column.render('Header')}
                     </th>

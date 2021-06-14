@@ -7,6 +7,9 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
     case 'updateConnection':
       updateConnection(req.profileId, req.publicIdentifier, sendResponse);
       return true;
+    case 'getConnections':
+      getConnections(req.collected, req.total, sendResponse);
+      return true;
     case 'getNextUpdate':
       getNextUpdate(sendResponse);
       return true;
@@ -14,7 +17,7 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
       sendMessage(req, sendResponse);
       return true;
     case `followConnection`:
-      disconnect()
+      disconnect();
       return true;
     case 'unfollowConnection':
       return true;
@@ -173,15 +176,14 @@ async function getLoggedInUser() {
  * @return {Array} all contacts
  */
 
-async function getAllOwnContacts() {
+async function getAllOwnContacts(start = 0, count = 500, totalConnections) {
   try {
-    let count = 500;
-    let start = 0;
-    const contacts = await getPaginatedOwnContacts(count, start);
-    const { total } = contacts.paging;
+    const total =
+      totalConnections ||
+      (await getPaginatedOwnContacts(count, start)).paging.total;
 
     const promises = [...Array(Math.ceil(total / count)).keys()].map((index) =>
-      getPaginatedOwnContacts(count, index * count).then((res) =>
+      getPaginatedOwnContacts(count, start + index * count).then((res) =>
         res.elements
           .map((element) => {
             if (element.connectedMemberResolutionResult) {
@@ -349,15 +351,15 @@ async function followProfile(publicIdentifier, action = 'follow') {
  * @return {Promise} Promise object for function.
  */
 async function disconnect(profileId) {
-    const url = `https://www.linkedin.com/voyager/api/identity/profiles/${profileId}/profileActions?action=disconnect`;
+  const url = `https://www.linkedin.com/voyager/api/identity/profiles/${profileId}/profileActions?action=disconnect`;
 
-    fetchLinkedinWithAcceptHeader(url, 'POST').then((res) => {
-      if (res) {
-        resolve(true);
-      } else {
-        reject('Disconnect failed.');
-      }
-    });
+  fetchLinkedinWithAcceptHeader(url, 'POST').then((res) => {
+    if (res) {
+      resolve(true);
+    } else {
+      reject('Disconnect failed.');
+    }
+  });
 }
 
 // -----------------
@@ -367,16 +369,21 @@ async function disconnect(profileId) {
  * @param {Object} sendResponse
  */
 async function initialize(sendResponse) {
-  const loggedInUser = await getLoggedInUser();
-  if (!loggedInUser) {
-    sendNotLoggedInResponse(sendResponse);
-    return;
+  try {
+    const loggedInUser = await getLoggedInUser();
+    if (!loggedInUser) {
+      sendNotLoggedInResponse(sendResponse);
+      return;
+    }
+    console.log('Logged in user: ', loggedInUser);
+    const allContacts = await getAllOwnContacts();
+    sendResponse({
+      userDetails: loggedInUser,
+      contacts: allContacts,
+    });
+  } catch (e) {
+    console.log(e);
   }
-  const allContacts = await getAllOwnContacts();
-  sendResponse({
-    userDetails: loggedInUser,
-    contacts: allContacts,
-  });
 }
 
 // -----------------
@@ -477,6 +484,18 @@ async function sendMessage(req, sendResponse) {
     }
   } else {
     sendResponse({ status: 'error', message: 'Message payload is empty.' });
+  }
+}
+
+async function getConnections(collected, total, sendResponse) {
+  try {
+    const connections = await getAllOwnContacts(collected, 500, total);
+    console.log('Connection - bg: ', connections);
+    sendResponse({
+      connections,
+    });
+  } catch (e) {
+    console.log(e);
   }
 }
 
