@@ -19,6 +19,7 @@ import {
   Avatar,
   CaretDownIcon,
   CaretUpIcon,
+  toaster,
 } from 'evergreen-ui';
 import { debounce } from 'debounce';
 import axios from 'axios';
@@ -215,6 +216,31 @@ function Table({ user, setRetConnections }) {
     chrome.tabs.create({ url: `https://linkedin.com/in/${publicIdentifier}` });
   };
 
+  const handleFollow = (publicIdentifier, action, firstName) => {
+    chrome.runtime.sendMessage({ action: action, publicIdentifier }, (resp) => {
+      console.log(resp);
+      if (resp.status === 'failed') {
+        toaster.danger('Not logged into linkedin.', {
+          description:
+            'Kindly login to your linkedin in this browser to access the features of the extension.',
+          duration: 6,
+        });
+      } else {
+        const text =
+          action === 'unfollowConnection'
+            ? 'Unfollow successful'
+            : 'Follow successful';
+
+        toaster.success(text, {
+          description: `You have successfully ${
+            action === 'unfollowConnection' ? 'unfollowed' : 'followed'
+          } ${firstName.toUpperCase()}`,
+          duration: 6,
+        });
+      }
+    });
+  };
+
   const handleDownload = () => {
     const headers = [
       'First Name',
@@ -370,8 +396,30 @@ function Table({ user, setRetConnections }) {
                       Message
                     </Menu.Item>
                     <Menu.Item icon={DisableIcon}>Disconnect</Menu.Item>
-                    <Menu.Item icon={FollowingIcon}>Follow</Menu.Item>
-                    <Menu.Item icon={FollowerIcon}>Unfollow</Menu.Item>
+                    <Menu.Item
+                      onSelect={() =>
+                        handleFollow(
+                          original.publicIdentifier,
+                          'followConnection',
+                          original.firstName
+                        )
+                      }
+                      icon={FollowingIcon}
+                    >
+                      Follow
+                    </Menu.Item>
+                    <Menu.Item
+                      onSelect={() =>
+                        handleFollow(
+                          original.publicIdentifier,
+                          'unfollowConnection',
+                          original.firstName
+                        )
+                      }
+                      icon={FollowerIcon}
+                    >
+                      Unfollow
+                    </Menu.Item>
                   </Menu.Group>
                 </Menu>
               )}
@@ -443,7 +491,7 @@ function Table({ user, setRetConnections }) {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '200px auto',
+              gridTemplateColumns: '250px auto',
               alignItems: 'end',
               gridGap: '30px',
             }}
@@ -454,7 +502,7 @@ function Table({ user, setRetConnections }) {
               onChange={handleInputSearch}
               value={inputSearch}
               label="Search"
-              width={200}
+              width={250}
               marginBottom={2}
               placeholder="Search in all columns"
             />

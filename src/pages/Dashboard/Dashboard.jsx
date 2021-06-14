@@ -56,9 +56,9 @@ function Dashboard() {
 
   useEffect(() => {
     // for dev
-    // axios.defaults.baseURL = `http://localhost:8000`;
+    axios.defaults.baseURL = `http://localhost:8000`;
     // for prod
-    axios.defaults.baseURL = 'http://159.65.146.74:8000';
+    // axios.defaults.baseURL = 'http://159.65.146.74:8000';
     setLoading(true);
     chrome.runtime.sendMessage({ action: 'initialize' }, async (response) => {
       // if the user is not logged into linked in

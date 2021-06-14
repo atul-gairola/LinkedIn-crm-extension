@@ -17,9 +17,10 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
       sendMessage(req, sendResponse);
       return true;
     case `followConnection`:
-      disconnect();
+      followProfile(req.publicIdentifier, 'follow', sendResponse);
       return true;
     case 'unfollowConnection':
+      followProfile(req.publicIdentifier, 'unfollow', sendResponse);
       return true;
     case 'disconnect':
       return true;
@@ -340,9 +341,17 @@ async function getProfileView(profileIdentifier) {
  * @param {string} action - action to perform (follow & unfollow).
  * @return {Promise} Promise object for function.
  */
-async function followProfile(publicIdentifier, action = 'follow') {
+async function followProfile(
+  publicIdentifier,
+  action = 'follow',
+  sendResponse
+) {
   const url = `https://www.linkedin.com/voyager/api/identity/profiles/${publicIdentifier}/profileActions?action=${action}`;
   const resp = await fetchLinkedInUrl(url, false, 'POST', {});
+  if (!resp) {
+    return sendNotLoggedInResponse(sendResponse);
+  }
+  sendResponse(resp);
 }
 
 /**
@@ -350,17 +359,17 @@ async function followProfile(publicIdentifier, action = 'follow') {
  * @param {string} profileId - profileId of LinkedIn Profile.
  * @return {Promise} Promise object for function.
  */
-async function disconnect(profileId) {
-  const url = `https://www.linkedin.com/voyager/api/identity/profiles/${profileId}/profileActions?action=disconnect`;
+// async function disconnect(profileId) {
+//   const url = `https://www.linkedin.com/voyager/api/identity/profiles/${profileId}/profileActions?action=disconnect`;
 
-  fetchLinkedinWithAcceptHeader(url, 'POST').then((res) => {
-    if (res) {
-      resolve(true);
-    } else {
-      reject('Disconnect failed.');
-    }
-  });
-}
+//   fetchLinkedinWithAcceptHeader(url, 'POST').then((res) => {
+//     if (res) {
+//       resolve(true);
+//     } else {
+//       reject('Disconnect failed.');
+//     }
+//   });
+// }
 
 // -----------------
 
