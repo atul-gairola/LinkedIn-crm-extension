@@ -20,6 +20,7 @@ import {
   CaretDownIcon,
   CaretUpIcon,
   toaster,
+  Dialog,
 } from 'evergreen-ui';
 import { debounce } from 'debounce';
 import axios from 'axios';
@@ -33,6 +34,7 @@ import {
   formatConnectionDataToRowData,
   connectionCSVData,
   downloadAsCSV,
+  getProfileIdFromUrn,
 } from '../../../utils';
 
 /**
@@ -56,6 +58,8 @@ function Table({ user, setRetConnections }) {
   const [fetchSearch, setFetchSearch] = useState('');
 
   const [showSendMessage, setShowSendMessage] = useState(false);
+  const [showDisconnect, setShowDisconnect] = useState(false);
+  const [toDisconnect, setToDisconnect] = useState();
 
   // TODO
   const [selected, setSelected] = useState([]);
@@ -241,6 +245,31 @@ function Table({ user, setRetConnections }) {
     });
   };
 
+  const handleDisconnect = () => {
+    chrome.runtime.sendMessage(
+      {
+        action: 'disconnect',
+        profileId: toDisconnect.profileId
+          ? toDisconnect.profileId
+          : getProfileIdFromUrn(toDisconnect.entityUrn),
+      },
+      (resp) => {
+        console.log(resp);
+        if (resp && resp.status >= 400) {
+          toaster.danger('Disconnection error', {
+            description: `Error occured while disconnecting with the connection. ${resp.message}`,
+          });
+        } else {
+          toaster.success('Disconnected successfully', {
+            description: `${toDisconnect.fullName} disconnected successfully.`,
+            duration: 6,
+          });
+          setShowDisconnect(false);
+        }
+      }
+    );
+  };
+
   const handleDownload = () => {
     const headers = [
       'First Name',
@@ -395,7 +424,19 @@ function Table({ user, setRetConnections }) {
                     >
                       Message
                     </Menu.Item>
-                    <Menu.Item icon={DisableIcon}>Disconnect</Menu.Item>
+                    <Menu.Item
+                      onSelect={() => {
+                        setShowDisconnect(true);
+                        setToDisconnect({
+                          profileId: original.profileId,
+                          entityUrn: original.entityUrn,
+                          fullName: original.fullName,
+                        });
+                      }}
+                      icon={DisableIcon}
+                    >
+                      Disconnect
+                    </Menu.Item>
                     <Menu.Item
                       onSelect={() =>
                         handleFollow(
@@ -463,6 +504,19 @@ function Table({ user, setRetConnections }) {
 
   return (
     <Pane>
+      {showDisconnect ? (
+        <Dialog
+          isShown={showDisconnect ? true : false}
+          title="Disconnect"
+          intent="danger"
+          onCloseComplete={() => setShowDisconnect(false)}
+          onConfirm={handleDisconnect}
+          confirmLabel="Disconnect"
+        >
+          Are you sure you want to disconnect {toDisconnect.fullName} from your
+          connections?
+        </Dialog>
+      ) : null}
       <SendMessage
         showSendMessage={showSendMessage}
         setShowSendMessage={setShowSendMessage}

@@ -23,6 +23,7 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
       followProfile(req.publicIdentifier, 'unfollow', sendResponse);
       return true;
     case 'disconnect':
+      disconnect(req.profileId, sendResponse);
       return true;
   }
 });
@@ -359,17 +360,14 @@ async function followProfile(
  * @param {string} profileId - profileId of LinkedIn Profile.
  * @return {Promise} Promise object for function.
  */
-// async function disconnect(profileId) {
-//   const url = `https://www.linkedin.com/voyager/api/identity/profiles/${profileId}/profileActions?action=disconnect`;
+async function disconnect(profileId, sendResponse) {
+  const url = `https://www.linkedin.com/voyager/api/identity/profiles/${profileId}/profileActions?action=disconnect`;
 
-//   fetchLinkedinWithAcceptHeader(url, 'POST').then((res) => {
-//     if (res) {
-//       resolve(true);
-//     } else {
-//       reject('Disconnect failed.');
-//     }
-//   });
-// }
+  const resp = await fetchLinkedInUrl(url, true, 'POST', {});
+
+  console.log(resp);
+  sendResponse(resp);
+}
 
 // -----------------
 
