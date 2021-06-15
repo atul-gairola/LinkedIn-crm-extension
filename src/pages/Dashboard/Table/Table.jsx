@@ -494,7 +494,6 @@ function Table({ user, setRetConnections }) {
     }
   }, [sortBy]);
 
-
   return (
     <Pane>
       {showDisconnect ? (
@@ -621,8 +620,18 @@ function Table({ user, setRetConnections }) {
                                 <Menu.Group>
                                   <Menu.Item
                                     onSelect={() => {
-                                      // setShowSendMessage(original)
-                                      console.log(rows);
+                                      const rowIdsArr =
+                                        Object.keys(selectedRowIds);
+
+                                      const selectedRows = rows.filter(
+                                        (cur, i) =>
+                                          rowIdsArr.includes(String(i))
+                                      );
+
+
+                                      setShowSendMessage(
+                                        selectedRows.map((cur) => cur.original)
+                                      );
                                     }}
                                     disabled={
                                       Object.keys(selectedRowIds).length > 25

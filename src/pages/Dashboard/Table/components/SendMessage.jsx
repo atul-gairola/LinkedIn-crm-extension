@@ -35,34 +35,45 @@ function SendMessage({ showSendMessage, setShowSendMessage }) {
 
     setLoading(true);
 
-    const messagePayload = {
-      keyVersion: 'LEGACY_INBOX',
-      conversationCreate: {
-        recipients: [
-          showSendMessage.profileId ||
-            getProfileIdFromUrn(showSendMessage.entityUrn),
-        ],
-        eventCreate: {
-          value: {
-            'com.linkedin.voyager.messaging.create.MessageCreate': {
-              attachments: [],
-              body: replaceTemplateWithValue(message, showSendMessage),
-              attributedBody: {
-                text: replaceTemplateWithValue(message, showSendMessage),
-                attributes: [],
+    const dataObj = Array.isArray(showSendMessage)
+      ? showSendMessage
+      : [showSendMessage];
+
+    const recipients = dataObj.map(
+      (cur) => cur.profileId || getProfileIdFromUrn(cur.entityUrn)
+    );
+
+    console.log(recipients);
+
+    const messagePayloads = recipients.map((cur, i) => {
+      return {
+        keyVersion: 'LEGACY_INBOX',
+        conversationCreate: {
+          recipients: [cur],
+          eventCreate: {
+            value: {
+              'com.linkedin.voyager.messaging.create.MessageCreate': {
+                attachments: [],
+                body: replaceTemplateWithValue(message, dataObj[i]),
+                attributedBody: {
+                  text: replaceTemplateWithValue(message, dataObj[i]),
+                  attributes: [],
+                },
+                mediaAttachments: [],
               },
-              mediaAttachments: [],
             },
           },
+          subtype: 'MEMBER_TO_MEMBER',
         },
-        subtype: 'MEMBER_TO_MEMBER',
-      },
-    };
+      };
+    });
+
+    console.log(messagePayloads);
 
     chrome.runtime.sendMessage(
       {
         action: 'sendMessage',
-        messagePayload,
+        messagePayloads,
       },
       (resp) => {
         if (resp.status === 'success') {
@@ -111,7 +122,10 @@ function SendMessage({ showSendMessage, setShowSendMessage }) {
       >
         <Text color="muted">
           Write a message to{' '}
-          {showSendMessage.firstName && showSendMessage.firstName.toUpperCase()}{' '}
+          {Array.isArray(showSendMessage)
+            ? showSendMessage.length + 'connections'
+            : showSendMessage.firstName &&
+              showSendMessage.firstName.toUpperCase()}{' '}
           directly from the dashboard. Choose and add required placeholders in
           the chat to send personalized messages to your connections.
         </Text>
@@ -130,7 +144,9 @@ function SendMessage({ showSendMessage, setShowSendMessage }) {
             width={240}
           >
             {placeholderTypes.map((cur, i) => (
-              <option key={i} value={cur.id}>{capitalizeFirstLetter(cur.label)}</option>
+              <option key={i} value={cur.id}>
+                {capitalizeFirstLetter(cur.label)}
+              </option>
             ))}
           </Select>
           <Button

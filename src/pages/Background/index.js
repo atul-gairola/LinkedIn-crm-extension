@@ -460,26 +460,33 @@ async function getNextUpdate() {
 }
 
 async function sendMessage(req, sendResponse) {
-  const { messagePayload } = req;
-  if (messagePayload) {
+  const { messagePayloads } = req;
+  if (messagePayloads.length > 0) {
+    console.log(messagePayloads);
     try {
-      const data = await fetchLinkedInUrl(
-        'https://www.linkedin.com/voyager/api/messaging/conversations',
-        false,
-        'POST',
-        messagePayload,
-        { action: 'create' }
-      );
-
-      if (!data) {
-        sendNotLoggedInResponse(sendResponse);
-        return data;
+      for (let i = 0; i < messagePayloads.length; i++) {
+        try {
+          const data = await fetchLinkedInUrl(
+            'https://www.linkedin.com/voyager/api/messaging/conversations',
+            false,
+            'POST',
+            messagePayloads[i],
+            { action: 'create' }
+          );
+          console.log(data);
+          if (!data) {
+            sendNotLoggedInResponse(sendResponse);
+            return data;
+          }
+        } catch (e) {
+          console.log(e);
+          return;
+        }
       }
 
       sendResponse({
         status: 'success',
         message: 'Message sent successfully',
-        data: data,
       });
     } catch (e) {
       console.log(e);
@@ -490,6 +497,7 @@ async function sendMessage(req, sendResponse) {
       });
     }
   } else {
+    console.log(req.messagePayloads);
     sendResponse({ status: 'error', message: 'Message payload is empty.' });
   }
 }
