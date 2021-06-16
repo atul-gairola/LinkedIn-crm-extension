@@ -347,12 +347,22 @@ async function followProfile(
   action = 'follow',
   sendResponse
 ) {
-  const url = `https://www.linkedin.com/voyager/api/identity/profiles/${publicIdentifier}/profileActions?action=${action}`;
-  const resp = await fetchLinkedInUrl(url, false, 'POST', {});
-  if (!resp) {
-    return sendNotLoggedInResponse(sendResponse);
+  let identifier = Array.isArray(publicIdentifier)
+    ? publicIdentifier
+    : [publicIdentifier];
+
+  if (identifier.length > 0) {
+    for (let i = 0; i < identifier.length; i++) {
+      const url = `https://www.linkedin.com/voyager/api/identity/profiles/${identifier[i]}/profileActions?action=${action}`;
+      const resp = await fetchLinkedInUrl(url, false, 'POST', {});
+      console.log(resp);
+      if (!resp) {
+        return sendNotLoggedInResponse(sendResponse);
+      }
+    }
   }
-  sendResponse(resp);
+
+  sendResponse({ status: 'complete' });
 }
 
 /**

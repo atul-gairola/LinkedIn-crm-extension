@@ -231,7 +231,11 @@ function Table({ user, setRetConnections }) {
         toaster.success(text, {
           description: `You have successfully ${
             action === 'unfollowConnection' ? 'unfollowed' : 'followed'
-          } ${firstName.toUpperCase()}`,
+          } ${
+            Array.isArray(firstName)
+              ? firstName.length + ' connections'
+              : firstName.toUpperCase()
+          }`,
           duration: 6,
         });
       }
@@ -628,7 +632,6 @@ function Table({ user, setRetConnections }) {
                                           rowIdsArr.includes(String(i))
                                       );
 
-
                                       setShowSendMessage(
                                         selectedRows.map((cur) => cur.original)
                                       );
@@ -661,25 +664,47 @@ function Table({ user, setRetConnections }) {
                                     Disconnect
                                   </Menu.Item>
                                   <Menu.Item
-                                    // onSelect={() =>
-                                    //   handleFollow(
-                                    //     original.publicIdentifier,
-                                    //     'followConnection',
-                                    //     original.firstName
-                                    //   )
-                                    // }
+                                    onSelect={() => {
+                                      const rowIdsArr =
+                                        Object.keys(selectedRowIds);
+
+                                      const selectedRows = rows.filter(
+                                        (cur, i) =>
+                                          rowIdsArr.includes(String(i))
+                                      );
+                                      handleFollow(
+                                        selectedRows.map(
+                                          (cur) => cur.original.publicIdentifier
+                                        ),
+                                        'followConnection',
+                                        selectedRows.map(
+                                          (cur) => cur.original.firstName
+                                        )
+                                      );
+                                    }}
                                     icon={FollowingIcon}
                                   >
                                     Follow
                                   </Menu.Item>
                                   <Menu.Item
-                                    // onSelect={() =>
-                                    //   handleFollow(
-                                    //     original.publicIdentifier,
-                                    //     'unfollowConnection',
-                                    //     original.firstName
-                                    //   )
-                                    // }
+                                    onSelect={() => {
+                                      const rowIdsArr =
+                                        Object.keys(selectedRowIds);
+
+                                      const selectedRows = rows.filter(
+                                        (cur, i) =>
+                                          rowIdsArr.includes(String(i))
+                                      );
+                                      handleFollow(
+                                        selectedRows.map(
+                                          (cur) => cur.original.publicIdentifier
+                                        ),
+                                        'unfollowConnection',
+                                        selectedRows.map(
+                                          (cur) => cur.original.firstName
+                                        )
+                                      );
+                                    }}
                                     icon={FollowerIcon}
                                   >
                                     Unfollow
