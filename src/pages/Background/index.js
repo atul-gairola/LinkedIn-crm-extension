@@ -371,12 +371,20 @@ async function followProfile(
  * @return {Promise} Promise object for function.
  */
 async function disconnect(profileId, sendResponse) {
-  const url = `https://www.linkedin.com/voyager/api/identity/profiles/${profileId}/profileActions?action=disconnect`;
+  const ids = Array.isArray(profileId) ? profileId : [proileId];
+  console.log(ids);
+  for (let i = 0; i < ids.length; i++) {
+    await sleep(1000);
+    const url = `https://www.linkedin.com/voyager/api/identity/profiles/${profileId}/profileActions?action=disconnect`;
 
-  const resp = await fetchLinkedInUrl(url, true, 'POST', {});
+    const resp = await fetchLinkedInUrl(url, true, 'POST', {});
+    console.log(resp);
 
-  console.log(resp);
-  sendResponse(resp);
+    if (!resp) {
+      return sendNotLoggedInResponse(sendResponse);
+    }
+  }
+  sendResponse({ status: 'complete' });
 }
 
 // -----------------

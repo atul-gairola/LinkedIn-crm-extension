@@ -243,12 +243,21 @@ function Table({ user, setRetConnections }) {
   };
 
   const handleDisconnect = () => {
+    console.log(toDisconnect);
+    let profileIds = Array.isArray(toDisconnect.original)
+      ? toDisconnect.original.map((cur) =>
+          cur.profileId ? cur.profileId : getProfileIdFromUrn(cur.entityUrn)
+        )
+      : [
+          toDisconnect.original.profileId ||
+            getProfileIdFromUrn(toDisconnect.original.entityUrn),
+        ];
+
+    console.log(profileIds);
     chrome.runtime.sendMessage(
       {
         action: 'disconnect',
-        profileId: toDisconnect.profileId
-          ? toDisconnect.profileId
-          : getProfileIdFromUrn(toDisconnect.entityUrn),
+        profileId: profileIds,
       },
       (resp) => {
         console.log(resp);
@@ -258,7 +267,11 @@ function Table({ user, setRetConnections }) {
           });
         } else {
           toaster.success('Disconnected successfully', {
-            description: `${toDisconnect.fullName} disconnected successfully.`,
+            description: `${
+              Array.isArray(toDisconnect)
+                ? toDisconnect.length + ' connections'
+                : toDisconnect.original.fullName
+            } disconnected successfully.`,
             duration: 6,
           });
           setShowDisconnect(false);
@@ -423,9 +436,10 @@ function Table({ user, setRetConnections }) {
                       onSelect={() => {
                         setShowDisconnect(true);
                         setToDisconnect({
-                          profileId: original.profileId,
-                          entityUrn: original.entityUrn,
-                          fullName: original.fullName,
+                          original: original,
+                          // profileId: original.profileId,
+                          // entityUrn: original.entityUrn,
+                          // fullName: original.fullName,
                         });
                       }}
                       icon={DisableIcon}
@@ -650,19 +664,28 @@ function Table({ user, setRetConnections }) {
                                   >
                                     Message
                                   </Menu.Item>
-                                  <Menu.Item
-                                    // onSelect={() => {
-                                    //   setShowDisconnect(true);
-                                    //   setToDisconnect({
-                                    //     profileId: original.profileId,
-                                    //     entityUrn: original.entityUrn,
-                                    //     fullName: original.fullName,
-                                    //   });
-                                    // }}
+                                  {/* <Menu.Item
+                                    onSelect={() => {
+                                      const rowIdsArr =
+                                        Object.keys(selectedRowIds);
+
+                                      const selectedRows = rows.filter(
+                                        (cur, i) =>
+                                          rowIdsArr.includes(String(i))
+                                      );
+                                      setShowDisconnect(true);
+                                      // setToDisconnect({
+                                      //   original: selectedRows.map(
+                                      //     (cur) => cur.original
+                                      //   ),
+                                      //   // entityUrn: original.entityUrn,
+                                      //   // fullName: original.fullName,
+                                      // });
+                                    }}
                                     icon={DisableIcon}
                                   >
                                     Disconnect
-                                  </Menu.Item>
+                                  </Menu.Item> */}
                                   <Menu.Item
                                     onSelect={() => {
                                       const rowIdsArr =
