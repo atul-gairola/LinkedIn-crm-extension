@@ -4,10 +4,19 @@ import { Button, Text, Image, Pane, Heading } from 'evergreen-ui';
 import logo from '../../assets/img/icon.svg';
 import googleLogo from '../../assets/img/google-logo.svg';
 
-function Login() {
+function Login({ setUserLoggedIn }) {
   function GoogleIcon() {
     return <Image src={googleLogo} alt="google logo" />;
   }
+
+  const handleLogin = () => {
+    chrome.runtime.sendMessage({ action: 'login' }, (res) => {
+      console.log(res);
+      if (res.status === 'success') {
+        setUserLoggedIn(true);
+      }
+    });
+  };
 
   return (
     <Pane
@@ -25,7 +34,12 @@ function Login() {
       <Text>
         Manage and organize your connections in a faster and more elegant way.
       </Text>
-      <Button iconBefore={GoogleIcon} size="large" appearance="primary">
+      <Button
+        onClick={handleLogin}
+        iconBefore={GoogleIcon}
+        size="large"
+        appearance="primary"
+      >
         Login with google
       </Button>
       <Text marginTop={10} size={300} color="muted">{`${

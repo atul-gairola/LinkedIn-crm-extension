@@ -22,6 +22,10 @@
       "css": ["content.styles.css"]
     }
   ],
+  "oauth2": {
+    "client_id": "353459658624-2hcgq4cae4o11v1lhvd12c707cddfpv5.apps.googleusercontent.com",
+    "scopes": ["email"]
+  },
   "web_accessible_resources": [
     {
       "resources": [
@@ -33,6 +37,6 @@
       "matches": []
     }
   ],
-  "permissions": ["tabs", "storage", "cookies", "identity"],
+  "permissions": ["tabs", "storage", "cookies", "identity", "identity.email"],
   "host_permissions": ["https://*.linkedin.com/*"]
 }
