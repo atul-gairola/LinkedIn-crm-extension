@@ -2,7 +2,7 @@
 chrome.storage.sync.set({ userSignedIn: false });
 
 chrome.identity.onSignInChanged.addListener((resp) => {
-  console.log(resp);
+  console.log('Sign in state: ', resp);
 });
 
 // Listener for runtime messages
@@ -77,6 +77,10 @@ function handleLogout(sendResponse) {
   chrome.storage.sync.get('authToken', (res) => {
     const { authToken } = res;
     console.log(authToken);
+
+    var url = 'https://accounts.google.com/o/oauth2/revoke?token=' + authToken;
+    fetch(url);
+
     chrome.identity.removeCachedAuthToken({ token: authToken }, () => {
       chrome.storage.sync.set({ userSignedIn: false });
       chrome.storage.sync.set({ authToken: null });
