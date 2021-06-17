@@ -1,5 +1,7 @@
 // set state in chrome storage
 chrome.storage.sync.set({ userSignedIn: false });
+chrome.storage.sync.set({ authToken: null });
+chrome.storage.sync.set({ currentUser: null });
 
 chrome.identity.onSignInChanged.addListener((resp) => {
   console.log('Sign in state: ', resp);
@@ -56,9 +58,31 @@ async function handleLogin(sendResponse) {
         chrome.identity.getAuthToken({ interactive: true }, (token) => {
           console.log(token);
           if (token) {
-            chrome.storage.sync.set({ userSignedIn: true });
-            chrome.storage.sync.set({ authToken: token });
-            sendResponse({ status: 'success', token: token });
+            chrome.identity.getProfileUserInfo(async (userInfo) => {
+              try {
+                const { email, id } = userInfo;
+                const body = JSON.stringify({ email: email, googleId: id });
+                const resp = await fetch('http://localhost:8000/user/login', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: body,
+                });
+
+                const responseObj = await resp.json();
+
+                const { user } = responseObj;
+
+                chrome.storage.sync.set({ currentUser: user._id });
+                chrome.storage.sync.set({ userSignedIn: true });
+                chrome.storage.sync.set({ authToken: token });
+                sendResponse({ status: 'success', token: token });
+              } catch (e) {
+                console.log(e);
+                sendResponse({ status: 'error', error: e });
+              }
+            });
           } else {
             sendResponse({
               status: 'error',
@@ -84,6 +108,7 @@ function handleLogout(sendResponse) {
     chrome.identity.removeCachedAuthToken({ token: authToken }, () => {
       chrome.storage.sync.set({ userSignedIn: false });
       chrome.storage.sync.set({ authToken: null });
+      chrome.storage.sync.set({ currentUser: null });
       sendResponse({ status: 'success' });
     });
   });
