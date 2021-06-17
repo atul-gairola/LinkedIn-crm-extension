@@ -1,9 +1,9 @@
 import React from 'react';
 import { render } from 'react-dom';
 
-import Dashboard from './Dashboard';
+import Wrapper from './Wrapper';
 import './index.css';
 
-render(<Dashboard />, window.document.querySelector('#app-container'));
+render(<Wrapper />, window.document.querySelector('#app-container'));
 
 if (module.hot) module.hot.accept();

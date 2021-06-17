@@ -1,11 +1,22 @@
 import React from 'react';
-import { Avatar, Pane, Heading, Text, Tooltip } from 'evergreen-ui';
+import {
+  Avatar,
+  Pane,
+  Heading,
+  Text,
+  Tooltip,
+  Popover,
+  Menu,
+  LogOutIcon,
+  Position,
+  toaster,
+} from 'evergreen-ui';
 
 import './Header.css';
 import logo from '../../assets/img/icon.svg';
 import { formatTimeStamp } from '../../utils';
 
-function Header({ user, retConnections }) {
+function Header({ user, retConnections, setUserLoggedIn }) {
   const { fullName, profilePicture, totalConnections, lastSync } = user;
 
   return (
@@ -82,15 +93,48 @@ function Header({ user, retConnections }) {
             </Pane>
           </Pane>
           <Tooltip content={fullName}>
-            <Avatar
-              // name={fullName}
-              size={40}
-              color="purple"
-              src={profilePicture}
-              cursor="pointer"
+            <Popover
+              position={Position.BOTTOM_LEFT}
+              content={({ close }) => (
+                <Menu>
+                  <Menu.Group>
+                    <Menu.Item
+                      onSelect={() => {
+                        console.log('logout');
+                        chrome.runtime.sendMessage(
+                          { action: 'logout' },
+                          (resp) => {
+                            if (resp.status === 'error') {
+                              toaster.danger('Error in logout', {
+                                description: resp.error,
+                                duration: 6,
+                              });
+                              return;
+                            }
+                            if (resp.status === 'success') {
+                              setUserLoggedIn(false);
+                            }
+                          }
+                        );
+                      }}
+                      icon={LogOutIcon}
+                    >
+                      Logout
+                    </Menu.Item>
+                  </Menu.Group>
+                </Menu>
+              )}
             >
-              {fullName}
-            </Avatar>
+              <Avatar
+                // name={fullName}
+                size={40}
+                color="purple"
+                src={profilePicture}
+                cursor="pointer"
+              >
+                {fullName}
+              </Avatar>
+            </Popover>
           </Tooltip>
         </Pane>
       </Pane>

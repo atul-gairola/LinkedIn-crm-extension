@@ -1,20 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button, Text, Image, Pane, Heading } from 'evergreen-ui';
 
 import logo from '../../assets/img/icon.svg';
 import googleLogo from '../../assets/img/google-logo.svg';
 
 function Login({ setUserLoggedIn }) {
+  const [loading, setLoading] = useState(false);
+
   function GoogleIcon() {
     return <Image src={googleLogo} alt="google logo" />;
   }
 
   const handleLogin = () => {
+    setLoading(true);
     chrome.runtime.sendMessage({ action: 'login' }, (res) => {
       console.log(res);
       if (res.status === 'success') {
         setUserLoggedIn(true);
       }
+      setLoading(false);
     });
   };
 
@@ -38,6 +42,7 @@ function Login({ setUserLoggedIn }) {
         onClick={handleLogin}
         iconBefore={GoogleIcon}
         size="large"
+        isLoading={loading}
         appearance="primary"
       >
         Login with google

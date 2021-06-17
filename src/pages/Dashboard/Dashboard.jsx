@@ -8,7 +8,7 @@ import Loading from '../../components/Loading';
 import NotLoggedInLinkedIn from './NotLoggedInLinkedIn';
 import { sleep } from '../../utils';
 
-function Dashboard() {
+function Dashboard({userLoggedIn, setUserLoggedIn}) {
   const [loading, setLoading] = useState(true);
   const [linkedInUser, setLinkedInUser] = useState();
   const [retConnections, setRetConnections] = useState();
@@ -137,7 +137,7 @@ function Dashboard() {
         </div>
       ) : linkedInUser ? (
         <div>
-          <Header user={linkedInUser} retConnections={retConnections} />
+          <Header setUserLoggedIn={setUserLoggedIn} user={linkedInUser} retConnections={retConnections} />
           <Pane paddingX={30} marginTop={50}>
             <Table user={linkedInUser} setRetConnections={setRetConnections} />
           </Pane>

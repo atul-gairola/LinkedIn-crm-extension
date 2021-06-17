@@ -1,29 +1,6 @@
 // set state in chrome storage
 chrome.storage.sync.set({ userSignedIn: false });
 
-const userSignedIn = false;
-const CLIENT_ID = encodeURIComponent(
-  '353459658624-2hcgq4cae4o11v1lhvd12c707cddfpv5.apps.googleusercontent.com'
-);
-const RESPONSE_TYPE = encodeURIComponent('id_token');
-const REDIRECT_URI = encodeURIComponent(
-  'https://ikjpdkijmhoecnhjeioklfacmmpldmll.chromiumapp.org'
-);
-const STATE = encodeURIComponent('mkdcnjfioeklks');
-const SCOPE = encodeURIComponent('openid');
-const PROMPT = encodeURIComponent('consent');
-
-function createOAuth2Url() {
-  let nonce = encodeURIComponent(
-    Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15)
-  );
-  let url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&response_type=${RESPONSE_TYPE}&redirect_uri=${REDIRECT_URI}&state=${STATE}&scope=${SCOPE}&prompt=${PROMPT}&nonce=${nonce}`;
-
-  console.log(url);
-  return url;
-}
-
 chrome.identity.onSignInChanged.addListener((resp) => {
   console.log(resp);
 });
@@ -76,24 +53,19 @@ async function handleLogin(sendResponse) {
       sendResponse({ status: 'error', error: 'user exists' });
     } else {
       try {
-        chrome.identity.launchWebAuthFlow(
-          {
-            url: createOAuth2Url(),
-            interactive: true,
-          },
-          (redirect_url) => {
-            console.log(redirect_url);
+        chrome.identity.getAuthToken({ interactive: true }, (token) => {
+          console.log(token);
+          if (token) {
             chrome.storage.sync.set({ userSignedIn: true });
-            sendResponse({ status: 'success', redirectUrl: redirect_url });
+            chrome.storage.sync.set({ authToken: token });
+            sendResponse({ status: 'success', token: token });
+          } else {
+            sendResponse({
+              status: 'error',
+              error: 'No token available',
+            });
           }
-        );
-        // chrome.identity.getAuthToken({ interactive: true }, (token) => {
-        //   console.log(token);
-        // });
-        // chrome.identity.getAccounts((resp) => {
-        //   console.log(resp);
-        // });
-        // chrome.identity.getProfileUserInfo((resp) => console.log(resp));
+        });
       } catch (e) {
         sendResponse({ status: 'error', error: e });
       }
@@ -101,14 +73,16 @@ async function handleLogin(sendResponse) {
   });
 }
 
-function handleLogout(sendResponse){
-  chrome.identity.launchWebAuthFlow(
-    { 'url': 'https://accounts.google.com/logout' },
-    function(tokenUrl) {
-      console.log(tokenUrl);
-        sendResponse({status: "success"});
-    }
-);
+function handleLogout(sendResponse) {
+  chrome.storage.sync.get('authToken', (res) => {
+    const { authToken } = res;
+    console.log(authToken);
+    chrome.identity.removeCachedAuthToken({ token: authToken }, () => {
+      chrome.storage.sync.set({ userSignedIn: false });
+      chrome.storage.sync.set({ authToken: null });
+      sendResponse({ status: 'success' });
+    });
+  });
 }
 
 /**
