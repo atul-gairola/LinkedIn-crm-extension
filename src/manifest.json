@@ -9,6 +9,7 @@
     "default_popup": "popup.html",
     "default_icon": "icon-32.png"
   },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAx6YhhKwhHrIvchlLM3UvfiFbL3zUyym0pFZP2+jWWGrSE/9RYAs1XxNsOPsrNvHmxYRR4QWSO27nCvwgbzNmfk45iBANoKouuXobWqtNBbnvHnhwEEDuCMiCSRNLtAsyAhhDkjQXLBIItybh5uYYVgiGXxsHmhLdim4wAWPKFfk/Fn63mOJZa3PtdW4uK7MzYIsBaTx1Ub49ZEuwrA/lVisyoT9oIb6R2GtnSAN2ZLXhatm3MpJkB8U/2J1sL0W+qX5ETkb686AkE8sw5pk/csalKUsZGIQpjD2MOfKi/IanNCTo3uotDOSYDVcsGLGyKz1gV/TQZSIpW7uZ+C1iGwIDAQAB",
   "icons": {
     "16": "icon-16.png",
     "32": "icon-32.png",
@@ -32,6 +33,6 @@
       "matches": []
     }
   ],
-  "permissions": ["tabs", "storage", "cookies"],
+  "permissions": ["tabs", "storage", "cookies", "identity"],
   "host_permissions": ["https://*.linkedin.com/*"]
 }
