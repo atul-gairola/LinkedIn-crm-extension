@@ -3,7 +3,7 @@
   "name": "LinkedIn CRM",
   "description": "A clean, organised CRM for linkedIN",
   "author": "StartupTalky",
-  "version": "1.1.1",
+  "version": "1.2",
   "background": { "service_worker": "background.bundle.js" },
   "action": {
     "default_popup": "popup.html",
