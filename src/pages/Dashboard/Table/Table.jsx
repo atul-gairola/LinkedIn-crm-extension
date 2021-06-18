@@ -22,6 +22,10 @@ import {
   toaster,
   Dialog,
   Tooltip,
+  TagIcon,
+  Badge,
+  RemoveIcon,
+  Select,
 } from 'evergreen-ui';
 import { debounce } from 'debounce';
 import axios from 'axios';
@@ -62,6 +66,12 @@ function Table({ user, setRetConnections }) {
   const [showDisconnect, setShowDisconnect] = useState(false);
   const [toDisconnect, setToDisconnect] = useState();
 
+  const [showApplyTag, setShowApplyTag] = useState(false);
+  const [showRemoveTag, setShowRemoveTag] = useState(false);
+  const [curConnectionForTag, setCurConnectionForTag] = useState();
+  const [tags, setTags] = useState([]);
+  const [selectedTag, setSelectedTag] = useState();
+  const [removeTagValues, setRemoveTagValues] = useState([]);
   // TODO
   const [fetchLoading, setFetchLoading] = useState([]);
 
@@ -121,6 +131,8 @@ function Table({ user, setRetConnections }) {
     const connectionsArr = data.connections.map((cur) =>
       formatConnectionDataToRowData(cur)
     );
+
+    console.log(connectionsArr);
     setTotalResults(meta.totalResults);
     setConnections(connectionsArr);
     setFetchLoading(connectionsArr.map((cur) => false));
@@ -174,6 +186,8 @@ function Table({ user, setRetConnections }) {
         );
 
         const { data, meta } = result;
+
+        console.log('update: ', data);
 
         // update state
         setRetConnections(meta.retrieved);
@@ -239,6 +253,45 @@ function Table({ user, setRetConnections }) {
           duration: 6,
         });
       }
+    });
+  };
+
+  const handleApplyTagDialog = (connectionId, type) => {
+    chrome.storage.sync.get('currentUser', async (resp) => {
+      const { currentUser } = resp;
+      const { data } = await axios.get(`/user/${currentUser}/tags`);
+      setTags(data.tags);
+      setCurConnectionForTag(connectionId);
+      setSelectedTag(data.tags[0]._id);
+      if (type === 'remove') {
+        setShowRemoveTag(true);
+      } else {
+        setShowApplyTag(true);
+      }
+    });
+  };
+
+  const applyTag = () => {
+    chrome.storage.sync.get('currentUser', async (resp) => {
+      const { currentUser } = resp;
+      const { data } = await axios.get(
+        `/user/${currentUser}/tags/${selectedTag}/connection/${curConnectionForTag}/apply`
+      );
+      console.log(data);
+      setShowApplyTag(false);
+      await fetchData();
+    });
+  };
+
+  const removeTag = () => {
+    chrome.storage.sync.get('currentUser', async (resp) => {
+      const { currentUser } = resp;
+      const { data } = await axios.delete(
+        `/user/${currentUser}/tags/${selectedTag}/connection/${curConnectionForTag}/remove`
+      );
+      console.log(data);
+      setShowRemoveTag(false);
+      await fetchData();
     });
   };
 
@@ -379,6 +432,25 @@ function Table({ user, setRetConnections }) {
         className: 'industryCell',
       },
       {
+        Header: 'Tag',
+        accessor: 'tags',
+        className: 'tagCell',
+        Cell: (row) => {
+          if (row.value.length > 0) {
+            return row.value.map((cur, i) => (
+              <>
+                <Badge key={i} color={cur.colorName}>
+                  {cur.name && cur.name.replaceAll(' ', '_')}
+                </Badge>
+                <br />
+              </>
+            ));
+          } else {
+            return '';
+          }
+        },
+      },
+      {
         Header: 'Contact Info',
         accessor: 'contact',
         disableSortBy: true,
@@ -392,8 +464,6 @@ function Table({ user, setRetConnections }) {
           return (
             <Button
               onClick={() => handleUpdateData(row.cell)}
-              // color="#cfd2fc"
-              // color="#8690fa"
               color="#5153ff"
               disabled={fetchLoading[row.id]}
               iconBefore={RefreshIcon}
@@ -433,6 +503,21 @@ function Table({ user, setRetConnections }) {
                       Message
                     </Menu.Item>
                     <Menu.Item
+                      onSelect={() => handleApplyTagDialog(original.id)}
+                      icon={TagIcon}
+                    >
+                      Apply Tag
+                    </Menu.Item>
+                    <Menu.Item
+                      onSelect={() =>
+                        handleApplyTagDialog(original.id, 'remove')
+                      }
+                      intent="danger"
+                      icon={RemoveIcon}
+                    >
+                      Remove Tag
+                    </Menu.Item>
+                    <Menu.Item
                       onSelect={() => {
                         setShowDisconnect(true);
                         setToDisconnect({
@@ -442,6 +527,7 @@ function Table({ user, setRetConnections }) {
                           // fullName: original.fullName,
                         });
                       }}
+                      intent="danger"
                       icon={DisableIcon}
                     >
                       Disconnect
@@ -467,6 +553,7 @@ function Table({ user, setRetConnections }) {
                         )
                       }
                       icon={FollowerIcon}
+                      intent="danger"
                     >
                       Unfollow
                     </Menu.Item>
@@ -527,6 +614,49 @@ function Table({ user, setRetConnections }) {
           connections?
         </Dialog>
       ) : null}
+      <Dialog
+        isShown={showApplyTag}
+        title="Apply tag"
+        onCloseComplete={() => setShowApplyTag(false)}
+        onConfirm={applyTag}
+        confirmLabel="Apply Tag"
+      >
+        <Select
+          value={selectedTag}
+          onChange={(e) => setSelectedTag(e.target.value)}
+          width="100%"
+        >
+          {tags.map((cur, i) => (
+            <option key={i} value={cur._id}>
+              {cur.name}
+            </option>
+          ))}
+        </Select>
+      </Dialog>
+      <SendMessage
+        showSendMessage={showSendMessage}
+        setShowSendMessage={setShowSendMessage}
+      />
+      <Dialog
+        isShown={showRemoveTag}
+        title="Remove Tag"
+        onCloseComplete={() => setShowRemoveTag(false)}
+        onConfirm={removeTag}
+        intent="danger"
+        confirmLabel="Remove Tag"
+      >
+        <Select
+          value={selectedTag}
+          onChange={(e) => setSelectedTag(e.target.value)}
+          width="100%"
+        >
+          {tags.map((cur, i) => (
+            <option key={i} value={cur._id}>
+              {cur.name}
+            </option>
+          ))}
+        </Select>
+      </Dialog>
       <SendMessage
         showSendMessage={showSendMessage}
         setShowSendMessage={setShowSendMessage}

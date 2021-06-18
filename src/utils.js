@@ -1,4 +1,4 @@
-  export function formatTimeStamp(timestamp) {
+export function formatTimeStamp(timestamp) {
   if (!timestamp) {
     return '';
   }
@@ -59,6 +59,7 @@ export function formatConnectionDataToRowData(connection) {
       (connection.contact.phoneNumbers && connection.contact.phoneNumbers[0]) ||
       '',
     address: connection.contact.address || '',
+    tags: connection.tags || [],
   };
 }
 
