@@ -62,7 +62,9 @@ async function handleLogin(sendResponse) {
               try {
                 const { email, id } = userInfo;
                 const body = JSON.stringify({ email: email, googleId: id });
-                const resp = await fetch('http://localhost:8000/user/login', {
+                // let url = 'http://localhost:8000/user/login';
+                let url = 'http://159.65.146.74:8000/user/login';
+                const resp = await fetch(url, {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
