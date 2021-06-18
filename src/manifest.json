@@ -9,7 +9,7 @@
     "default_popup": "popup.html",
     "default_icon": "icon-32.png"
   },
-  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAx6YhhKwhHrIvchlLM3UvfiFbL3zUyym0pFZP2+jWWGrSE/9RYAs1XxNsOPsrNvHmxYRR4QWSO27nCvwgbzNmfk45iBANoKouuXobWqtNBbnvHnhwEEDuCMiCSRNLtAsyAhhDkjQXLBIItybh5uYYVgiGXxsHmhLdim4wAWPKFfk/Fn63mOJZa3PtdW4uK7MzYIsBaTx1Ub49ZEuwrA/lVisyoT9oIb6R2GtnSAN2ZLXhatm3MpJkB8U/2J1sL0W+qX5ETkb686AkE8sw5pk/csalKUsZGIQpjD2MOfKi/IanNCTo3uotDOSYDVcsGLGyKz1gV/TQZSIpW7uZ+C1iGwIDAQAB",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA9HhBIOw4d1eo0m1xsbWHSjb7RQjtbTnV4OcDoWZaaLm5RorXOVxIhOFRAKkJqEVWNjd5zQSg+4x7nY6asDHxqkug6BRDuHm/O/2bgdC7EI/z0lCJzbTETZMToWhpNEZMboa/rULMV6tbwcMT3IIL198LYgOl+T/Fzs9lJXY676tPeosP/wNb9EeqJjuMDvMG5HjcprTZ75rOpHIx92mjf0+vReZQTlQ16ZqdIJNuzgX7fo93wxBZFQI6jXSvDwgFBkBR3Z8r00ROJgMRv843Sd3WqJygtFfq2VTX4VABat8pWjcyofg1eocOaDo/zyfW3JtzYfT+MTe6q8PLZt1DlQIDAQAB",
   "icons": {
     "16": "icon-16.png",
     "32": "icon-32.png",
