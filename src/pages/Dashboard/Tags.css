@@ -1,0 +1,7 @@
+.tagDescriptionCell {
+  min-width: 500px;
+}
+.tagActionCell {
+  display: grid;
+  justify-items: end;
+}

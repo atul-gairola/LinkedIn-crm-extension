@@ -10,14 +10,23 @@ import {
   LogOutIcon,
   Position,
   toaster,
+  Tab,
 } from 'evergreen-ui';
 
 import './Header.css';
-import logo from '../../assets/img/icon.svg';
-import { formatTimeStamp } from '../../utils';
+import logo from '../assets/img/icon.svg';
+import { formatTimeStamp } from '../utils';
 
-function Header({ user, retConnections, setUserLoggedIn }) {
+function Header({
+  user,
+  retConnections,
+  setUserLoggedIn,
+  selectedTab,
+  setSelectedTab,
+}) {
   const { fullName, profilePicture, totalConnections, lastSync } = user;
+
+  const tabs = ['Connections', 'Tags'];
 
   return (
     <header>
@@ -30,9 +39,19 @@ function Header({ user, retConnections, setUserLoggedIn }) {
       >
         <Pane flex={1} alignItems="center" display="flex">
           <img style={{ width: 40, marginRight: 20 }} src={logo} alt="logo" />
-          <Heading is="h3" fontWeight="bold">
+          <Heading is="h3" marginRight={50} fontWeight="bold">
             LinkedIn CRM
           </Heading>
+          {tabs.map((tab, index) => (
+            <Tab
+              key={index}
+              id={tab}
+              onSelect={() => setSelectedTab(tab)}
+              isSelected={selectedTab === tab}
+            >
+              {tab}
+            </Tab>
+          ))}
         </Pane>
         <Pane
           display="grid"

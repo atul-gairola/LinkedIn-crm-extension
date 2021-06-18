@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Pane, Text, toaster } from 'evergreen-ui';
 import axios from 'axios';
 
-import Header from './Header';
-import Table from './Table/Table';
+import Header from '../../components/Header';
 import Loading from '../../components/Loading';
 import NotLoggedInLinkedIn from './NotLoggedInLinkedIn';
+import Connections from './Connections';
+import Tags from './Tags';
 import { sleep } from '../../utils';
 
-function Dashboard({userLoggedIn, setUserLoggedIn}) {
+function Dashboard({ userLoggedIn, setUserLoggedIn }) {
   const [loading, setLoading] = useState(true);
   const [linkedInUser, setLinkedInUser] = useState();
   const [retConnections, setRetConnections] = useState();
+  const [selectedTab, setSelectedTab] = useState('Connections');
 
   function collectConnections(collected, total, user) {
     chrome.runtime.sendMessage(
@@ -56,9 +58,9 @@ function Dashboard({userLoggedIn, setUserLoggedIn}) {
 
   useEffect(() => {
     // for dev
-    // axios.defaults.baseURL = `http://localhost:8000`;
+    axios.defaults.baseURL = `http://localhost:8000`;
     // for prod
-    axios.defaults.baseURL = 'http://159.65.146.74:8000';
+    // axios.defaults.baseURL = 'http://159.65.146.74:8000';
     setLoading(true);
     chrome.runtime.sendMessage({ action: 'initialize' }, async (response) => {
       // if the user is not logged into linked in
@@ -137,16 +139,23 @@ function Dashboard({userLoggedIn, setUserLoggedIn}) {
         </div>
       ) : linkedInUser ? (
         <div>
-          <Header setUserLoggedIn={setUserLoggedIn} user={linkedInUser} retConnections={retConnections} />
+          <Header
+            setUserLoggedIn={setUserLoggedIn}
+            user={linkedInUser}
+            retConnections={retConnections}
+            selectedTab={selectedTab}
+            setSelectedTab={setSelectedTab}
+          />
           <Pane paddingX={30} marginTop={50}>
-            <Table user={linkedInUser} setRetConnections={setRetConnections} />
+            {selectedTab === 'Connections' ? (
+              <Connections
+                user={linkedInUser}
+                setRetConnections={setRetConnections}
+              />
+            ) : (
+              <Tags />
+            )}
           </Pane>
-          <div style={{ textAlign: 'center', marginBottom: 20 }}>
-            <Text>
-              {chrome.runtime.getManifest().name} - v
-              {chrome.runtime.getManifest().version}
-            </Text>
-          </div>
         </div>
       ) : (
         <NotLoggedInLinkedIn />
