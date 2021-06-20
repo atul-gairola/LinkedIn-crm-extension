@@ -1,7 +1,21 @@
-// set state in chrome storage
-chrome.storage.sync.set({ userSignedIn: false });
-chrome.storage.sync.set({ authToken: null });
-chrome.storage.sync.set({ currentUser: null });
+/**
+ * @desc LISTENER - handles the install and update of the extension
+ */
+chrome.runtime.onInstalled.addListener((details) => {
+  console.log('Details : ', details);
+  if (details.reason === 'install') {
+    // set state in chrome storage
+    chrome.storage.sync.set({ userSignedIn: false });
+    chrome.storage.sync.set({ authToken: null });
+    chrome.storage.sync.set({ currentUser: null });
+  } else if (details.reason === 'update') {
+    // JUST FOR DEVELOPMENT *******************************************
+    console.log('Update');
+    handleLogout();
+  }
+});
+
+// -----
 
 chrome.identity.onSignInChanged.addListener((resp) => {
   console.log('Sign in state: ', resp);
@@ -62,8 +76,8 @@ async function handleLogin(sendResponse) {
               try {
                 const { email, id } = userInfo;
                 const body = JSON.stringify({ email: email, googleId: id });
-                // let url = 'http://localhost:8000/user/login';
-                let url = 'http://159.65.146.74:8000/user/login';
+                let url = 'http://localhost:8000/user/login';
+                // let url = 'http://159.65.146.74:8000/user/login';
                 const resp = await fetch(url, {
                   method: 'POST',
                   headers: {
@@ -102,17 +116,20 @@ async function handleLogin(sendResponse) {
 function handleLogout(sendResponse) {
   chrome.storage.sync.get('authToken', (res) => {
     const { authToken } = res;
-    console.log(authToken);
+    if (authToken) {
+      var url =
+        'https://accounts.google.com/o/oauth2/revoke?token=' + authToken;
+      fetch(url);
 
-    var url = 'https://accounts.google.com/o/oauth2/revoke?token=' + authToken;
-    fetch(url);
-
-    chrome.identity.removeCachedAuthToken({ token: authToken }, () => {
-      chrome.storage.sync.set({ userSignedIn: false });
-      chrome.storage.sync.set({ authToken: null });
-      chrome.storage.sync.set({ currentUser: null });
-      sendResponse({ status: 'success' });
-    });
+      chrome.identity.removeCachedAuthToken({ token: authToken }, () => {
+        chrome.storage.sync.set({ userSignedIn: false });
+        chrome.storage.sync.set({ authToken: null });
+        chrome.storage.sync.set({ currentUser: null });
+        if (sendResponse) {
+          sendResponse({ status: 'success' });
+        }
+      });
+    }
   });
 }
 

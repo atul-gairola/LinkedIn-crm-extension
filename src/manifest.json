@@ -23,7 +23,7 @@
     }
   ],
   "oauth2": {
-    "client_id": "353459658624-fs2sh7kgqt4su2f2023ng70ns4svaqe5.apps.googleusercontent.com",
+    "client_id": "353459658624-qdeoji0fihs5mr8hqcih98199fp3fit4.apps.googleusercontent.com",
     "scopes": ["email", "profile", "openid"]
   },
   "web_accessible_resources": [
