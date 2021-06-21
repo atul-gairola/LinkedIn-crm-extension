@@ -23,7 +23,7 @@ function Dashboard({ userLoggedIn, setUserLoggedIn }) {
         for (let i = 0; i < connections.length; i++) {
           if (connections[i]) {
             try {
-              await sleep(500);
+              await sleep(1500);
               const { data } = await axios.post(
                 `/connections/`,
                 { connection: connections[i] },
@@ -37,8 +37,10 @@ function Dashboard({ userLoggedIn, setUserLoggedIn }) {
                 ...prev,
                 collectedConnections: prev.collectedConnections + 1,
               }));
+              // console.log("Collected Index : ", i);
             } catch (e) {
               console.log(e);
+              console.log('Not collected : ', connections[i], ' : ', i);
               if (!(e.response && e.response.status === 409)) {
                 toaster.warning('Error in collecting', {
                   duration: 6,
@@ -58,9 +60,9 @@ function Dashboard({ userLoggedIn, setUserLoggedIn }) {
 
   useEffect(() => {
     // for dev
-    axios.defaults.baseURL = `http://localhost:8000`;
+    // axios.defaults.baseURL = `http://localhost:8000`;
     // for prod
-    // axios.defaults.baseURL = 'http://159.65.146.74:8000';
+    axios.defaults.baseURL = 'http://159.65.146.74:8000';
     setLoading(true);
     chrome.runtime.sendMessage({ action: 'initialize' }, async (response) => {
       // if the user is not logged into linked in

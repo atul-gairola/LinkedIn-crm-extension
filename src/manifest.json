@@ -3,7 +3,7 @@
   "name": "LinkedIn CRM",
   "description": "A clean, organised CRM for linkedIN",
   "author": "StartupTalky",
-  "version": "1.2",
+  "version": "1.2.1",
   "background": { "service_worker": "background.bundle.js" },
   "action": {
     "default_popup": "popup.html",
@@ -23,7 +23,7 @@
     }
   ],
   "oauth2": {
-    "client_id": "353459658624-qdeoji0fihs5mr8hqcih98199fp3fit4.apps.googleusercontent.com",
+    "client_id": "353459658624-fs2sh7kgqt4su2f2023ng70ns4svaqe5.apps.googleusercontent.com",
     "scopes": ["email", "profile", "openid"]
   },
   "web_accessible_resources": [
@@ -37,6 +37,6 @@
       "matches": []
     }
   ],
-  "permissions": ["tabs", "storage", "cookies", "identity", "identity.email"],
+  "permissions": ["storage", "cookies", "identity", "identity.email"],
   "host_permissions": ["https://*.linkedin.com/*"]
 }

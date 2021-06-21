@@ -76,8 +76,8 @@ async function handleLogin(sendResponse) {
               try {
                 const { email, id } = userInfo;
                 const body = JSON.stringify({ email: email, googleId: id });
-                let url = 'http://localhost:8000/user/login';
-                // let url = 'http://159.65.146.74:8000/user/login';
+                // let url = 'http://localhost:8000/user/login';
+                let url = 'http://159.65.146.74:8000/user/login';
                 const resp = await fetch(url, {
                   method: 'POST',
                   headers: {
@@ -623,7 +623,6 @@ async function sendMessage(req, sendResponse) {
 async function getConnections(collected, total, sendResponse) {
   try {
     const connections = await getAllOwnContacts(collected, 500, total);
-    console.log('Connection - bg: ', connections);
     sendResponse({
       connections,
     });
