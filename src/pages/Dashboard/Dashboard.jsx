@@ -40,13 +40,14 @@ function Dashboard({ userLoggedIn, setUserLoggedIn }) {
               // console.log("Collected Index : ", i);
             } catch (e) {
               console.log(e);
-              console.log('Not collected : ', connections[i], ' : ', i);
               if (!(e.response && e.response.status === 409)) {
                 toaster.warning('Error in collecting', {
                   duration: 6,
                 });
               }
             }
+          } else {
+            console.log('No connection');
           }
         }
 
@@ -58,11 +59,19 @@ function Dashboard({ userLoggedIn, setUserLoggedIn }) {
     );
   }
 
+  async function updateConnectionsProcess() {
+    const updateConnection = (response) => {
+      console.log(response);
+    };
+
+    chrome.runtime.sendMessage({ action: 'getNextUpdate' }, updateConnection);
+  }
+
   useEffect(() => {
     // for dev
-    // axios.defaults.baseURL = `http://localhost:8000`;
+    axios.defaults.baseURL = `http://localhost:8000`;
     // for prod
-    axios.defaults.baseURL = 'http://159.65.146.74:8000';
+    // axios.defaults.baseURL = 'http://159.65.146.74:8000';
     setLoading(true);
     chrome.runtime.sendMessage({ action: 'initialize' }, async (response) => {
       // if the user is not logged into linked in
@@ -72,32 +81,34 @@ function Dashboard({ userLoggedIn, setUserLoggedIn }) {
       }
 
       const { userDetails, contacts } = response;
+
+      const validContacts = contacts.filter((cur) => cur);
+
       const { data } = await axios.post('/connections/init', {
         userDetails: {
           ...userDetails,
-          totalConnections: contacts.length,
+          totalConnections: validContacts.length,
         },
-        contacts: response.contacts.slice(0, 400),
+        contacts: validContacts.filter((cur) => cur).slice(0, 300),
       });
 
       const { user, newInit } = data;
-
-      console.log('User: ', user);
 
       setLinkedInUser(user);
       setRetConnections(user.retrievedConnections);
       setLoading(false);
 
-      const { collectedConnections, totalConnections } = user;
+      const { collectedConnections, totalConnections, retrievedConnections } =
+        user;
 
-      // if all collections are not collected
+      if (retrievedConnections !== totalConnections) {
+        updateConnectionsProcess();
+      }
+
       if (collectedConnections !== totalConnections) {
         console.log('Connections to collect');
         // collect rest connections
-        collectConnections(collectedConnections, totalConnections, user);
-      } else {
-        console.log('All connections collected');
-        // start updating connections
+        // collectConnections(collectedConnections, totalConnections, user);
       }
     });
   }, []);
