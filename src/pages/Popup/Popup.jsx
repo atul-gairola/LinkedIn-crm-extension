@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import Login from '../Login/Login';
+import Auth from '../Auth/Auth';
 
 import HomePopup from '../HomePopup/HomePopup';
 
@@ -19,12 +19,7 @@ const Popup = () => {
     });
   });
 
-  return !userLoggedIn ? (
-    <Login setUserLoggedIn={setUserLoggedIn} />
-  ) : (
-    <HomePopup />
-  );
-
+  return !userLoggedIn ? <Auth /> : <HomePopup />;
 };
 
 export default Popup;
