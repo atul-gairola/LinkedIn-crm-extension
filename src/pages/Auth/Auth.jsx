@@ -5,7 +5,7 @@ import logo from '../../assets/img/icon.svg';
 import Login from './Login';
 import Signup from './Signup';
 
-function Auth() {
+function Auth({ setUserLoggedIn }) {
   const [formType, setFormType] = useState('login');
 
   return (
@@ -22,9 +22,9 @@ function Auth() {
         LINKEDIN CRM
       </Heading>
       {formType === 'login' ? (
-        <Login setFormType={setFormType} />
+        <Login setUserLoggedIn={setUserLoggedIn} setFormType={setFormType} />
       ) : (
-        <Signup setFormType={setFormType} />
+        <Signup setUserLoggedIn={setUserLoggedIn} setFormType={setFormType} />
       )}
       <Text marginTop={10} size={300} color="muted">{`${
         chrome.runtime.getManifest().name

@@ -32,7 +32,7 @@ function Tags() {
     description: '',
   });
 
-  const fetchTags = () => {
+  const fetchTags =  () => {
     setLoading(true);
     chrome.storage.sync.get('currentUser', async (resp) => {
       const { currentUser } = resp;
@@ -142,7 +142,7 @@ function Tags() {
       {
         Header: '',
         accessor: 'action',
-        Cell: ({row}) => {
+        Cell: ({ row }) => {
           return (
             <IconButton
               onClick={() => handleDelete(row.original._id)}

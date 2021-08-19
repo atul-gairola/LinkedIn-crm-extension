@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
-import { Button, Text, Pane, TextInputField, Strong, toaster } from 'evergreen-ui';
-import axios from "axios";
+import {
+  Button,
+  Text,
+  Pane,
+  TextInputField,
+  Strong,
+  toaster,
+} from 'evergreen-ui';
+import axios from 'axios';
 
-function Signup({ setFormType }) {
+function Signup({ setFormType, setUserLoggedIn }) {
   const [loading, setLoading] = useState(false);
   const [credentials, setCredentials] = useState({
     email: '',
@@ -24,7 +31,9 @@ function Signup({ setFormType }) {
         `http://localhost:8000/auth/signup`,
         credentials
       );
-      localStorage.setItem(token, data.jwt);
+      chrome.storage.sync.set({ token: data.jwt});
+      chrome.storage.sync.set({ currentUser: data.userId});
+      setUserLoggedIn(true)
     } catch (e) {
       console.log(e);
       if (e.response) {

@@ -7,10 +7,10 @@ function Wrapper() {
   const [userLoggedIn, setUserLoggedIn] = useState(false);
 
   useEffect(() => {
-    chrome.storage.sync.get('userSignedIn', (resp) => {
-      const { userSignedIn } = resp;
-      console.log('User signed in: ', userSignedIn);
-      if (userSignedIn) {
+    chrome.storage.sync.get('token', (resp) => {
+      const { token } = resp;
+      console.log('User signed in: ', token);
+      if (token) {
         setUserLoggedIn(true);
       } else {
         setUserLoggedIn(false);
@@ -18,7 +18,7 @@ function Wrapper() {
     });
   });
   return userLoggedIn ? (
-    <Dashboard userLoggedIn={userLoggedIn} setUserLoggedIn={setUserLoggedIn} />
+    <Dashboard setUserLoggedIn={setUserLoggedIn} />
   ) : (
     <Login setUserLoggedIn={setUserLoggedIn} />
   );

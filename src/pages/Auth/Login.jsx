@@ -9,7 +9,7 @@ import {
   toaster,
 } from 'evergreen-ui';
 
-function Login({ setFormType }) {
+function Login({ setFormType, setUserLoggedIn }) {
   const [loading, setLoading] = useState(false);
   const [credentials, setCredentials] = useState({
     email: '',
@@ -31,7 +31,10 @@ function Login({ setFormType }) {
         `http://localhost:8000/auth/login`,
         credentials
       );
-      localStorage.setItem(token, data.jwt);
+
+      chrome.storage.sync.set({ token: data.jwt });
+      chrome.storage.sync.set({ currentUser: data.userId });
+      setUserLoggedIn(true);
     } catch (e) {
       console.log(e);
       if (e.response) {

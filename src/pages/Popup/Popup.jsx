@@ -8,18 +8,18 @@ const Popup = () => {
   const [userLoggedIn, setUserLoggedIn] = useState(false);
 
   useEffect(() => {
-    chrome.storage.sync.get('userSignedIn', (resp) => {
-      const { userSignedIn } = resp;
-
-      if (userSignedIn) {
+    chrome.storage.sync.get('token', (resp) => {
+      const { token } = resp;
+      console.log(token);
+      if (token) {
         setUserLoggedIn(true);
       } else {
         setUserLoggedIn(false);
       }
     });
-  });
+  }, []);
 
-  return !userLoggedIn ? <Auth /> : <HomePopup />;
+  return !userLoggedIn ? <Auth setUserLoggedIn={setUserLoggedIn} /> : <HomePopup />;
 };
 
 export default Popup;

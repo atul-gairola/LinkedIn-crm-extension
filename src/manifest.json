@@ -1,15 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "LinkedIn CRM",
-  "description": "A clean, organised CRM for linkedIN",
-  "author": "StartupTalky",
-  "version": "1.2.1",
+  "name": "Linked-In CRM (leaddelta clone)",
+  "description": "A clean, organised CRM for linkedIN.",
+  "author": "atul gairola",
+  "version": "2",
   "background": { "service_worker": "background.bundle.js" },
   "action": {
     "default_popup": "popup.html",
     "default_icon": "icon-32.png"
   },
-  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA9HhBIOw4d1eo0m1xsbWHSjb7RQjtbTnV4OcDoWZaaLm5RorXOVxIhOFRAKkJqEVWNjd5zQSg+4x7nY6asDHxqkug6BRDuHm/O/2bgdC7EI/z0lCJzbTETZMToWhpNEZMboa/rULMV6tbwcMT3IIL198LYgOl+T/Fzs9lJXY676tPeosP/wNb9EeqJjuMDvMG5HjcprTZ75rOpHIx92mjf0+vReZQTlQ16ZqdIJNuzgX7fo93wxBZFQI6jXSvDwgFBkBR3Z8r00ROJgMRv843Sd3WqJygtFfq2VTX4VABat8pWjcyofg1eocOaDo/zyfW3JtzYfT+MTe6q8PLZt1DlQIDAQAB",
   "icons": {
     "16": "icon-16.png",
     "32": "icon-32.png",
@@ -22,10 +21,6 @@
       "css": ["content.styles.css"]
     }
   ],
-  "oauth2": {
-    "client_id": "157449618284-9eg374a639v9godohhup2qar0ditgov8.apps.googleusercontent.com",
-    "scopes": ["email", "profile", "openid"]
-  },
   "web_accessible_resources": [
     {
       "resources": [
@@ -37,6 +32,6 @@
       "matches": []
     }
   ],
-  "permissions": ["storage", "cookies", "identity", "identity.email"],
+  "permissions": ["storage", "cookies"],
   "host_permissions": ["https://*.linkedin.com/*"]
 }

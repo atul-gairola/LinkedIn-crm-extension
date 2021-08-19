@@ -15,18 +15,10 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
-// -----
-
-chrome.identity.onSignInChanged.addListener((resp) => {
-  console.log('Sign in state: ', resp);
-});
 
 // Listener for runtime messages
 chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
   switch (req.action) {
-    case 'login':
-      handleLogin(sendResponse);
-      return true;
     case 'logout':
       handleLogout(sendResponse);
       return true;
@@ -65,75 +57,11 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
 // helper function which adds a pause to the code for given ms
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function handleLogin(sendResponse) {
-  chrome.storage.sync.get('userSignedIn', (resp) => {
-    if (resp && resp.userSignedIn) {
-      console.log('User already logged in');
-      sendResponse({ status: 'error', error: 'user exists' });
-    } else {
-      try {
-        chrome.identity.getAuthToken({ interactive: true }, (token) => {
-          console.log(token);
-          if (token) {
-            chrome.identity.getProfileUserInfo(async (userInfo) => {
-              try {
-                const { email, id } = userInfo;
-                const body = JSON.stringify({ email: email, googleId: id });
-                let url = 'http://localhost:8000/user/login';
-                // let url = 'http://159.65.146.74:8000/user/login';
-                const resp = await fetch(url, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: body,
-                });
-
-                const responseObj = await resp.json();
-
-                const { user } = responseObj;
-
-                chrome.storage.sync.set({ currentUser: user._id });
-                chrome.storage.sync.set({ userSignedIn: true });
-                chrome.storage.sync.set({ authToken: token });
-                sendResponse({ status: 'success', token: token });
-              } catch (e) {
-                console.log(e);
-                sendResponse({ status: 'error', error: e });
-              }
-            });
-          } else {
-            sendResponse({
-              status: 'error',
-              error: 'No token available',
-            });
-          }
-        });
-      } catch (e) {
-        sendResponse({ status: 'error', error: e });
-      }
-    }
-  });
-}
 
 function handleLogout(sendResponse) {
-  chrome.storage.sync.get('authToken', (res) => {
-    const { authToken } = res;
-    if (authToken) {
-      var url =
-        'https://accounts.google.com/o/oauth2/revoke?token=' + authToken;
-      fetch(url);
-
-      chrome.identity.removeCachedAuthToken({ token: authToken }, () => {
-        chrome.storage.sync.set({ userSignedIn: false });
-        chrome.storage.sync.set({ authToken: null });
-        chrome.storage.sync.set({ currentUser: null });
-        if (sendResponse) {
-          sendResponse({ status: 'success' });
-        }
-      });
-    }
-  });
+  chrome.storage.sync.set({ currentUser: null });
+  chrome.storage.sync.set({ token: null });
+  sendResponse({ status: 'success' });
 }
 
 /**

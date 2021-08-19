@@ -9,7 +9,7 @@ import Connections from './Connections';
 import Tags from './Tags';
 import { sleep } from '../../utils';
 
-function Dashboard({ userLoggedIn, setUserLoggedIn }) {
+function Dashboard({ setUserLoggedIn }) {
   const [loading, setLoading] = useState(true);
   const [linkedInUser, setLinkedInUser] = useState();
   const [retConnections, setRetConnections] = useState();
@@ -113,13 +113,13 @@ function Dashboard({ userLoggedIn, setUserLoggedIn }) {
         user;
 
       if (retrievedConnections !== totalConnections) {
-        updateConnectionsProcess();
+        // updateConnectionsProcess();
       }
 
       if (collectedConnections !== totalConnections) {
         console.log('Connections to collect');
         // collect rest connections
-        // collectConnections(collectedConnections, totalConnections, user);
+        collectConnections(collectedConnections, totalConnections, user);
       }
     });
   }, []);

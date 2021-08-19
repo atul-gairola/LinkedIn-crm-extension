@@ -1,25 +1,41 @@
 import React, { useState } from 'react';
-import { Pane, Button, Text, Image } from 'evergreen-ui';
-
+import { Pane, Button, Text, Image, TextInputField } from 'evergreen-ui';
+import axios from "axios";
 import logo from '../../assets/img/icon.svg';
-import googleLogo from '../../assets/img/google-logo.svg';
 
 function Login({ setUserLoggedIn }) {
   const [loading, setLoading] = useState(false);
+  const [credentials, setCredentials] = useState({
+    email: '',
+    password: '',
+  });
 
-  function GoogleIcon() {
-    return <Image src={googleLogo} alt="google-logo" />;
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setCredentials((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   }
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setLoading(true);
-    chrome.runtime.sendMessage({ action: 'login' }, (res) => {
-      console.log(res);
-      if (res.status === 'success') {
-        setUserLoggedIn(true);
+    try {
+      const { data } = await axios.post(
+        `http://localhost:8000/auth/login`,
+        credentials
+      );
+
+      chrome.storage.sync.set({ token: data.jwt });
+      chrome.storage.sync.set({ currentUser: data.userId });
+      setUserLoggedIn(true);
+    } catch (e) {
+      console.log(e);
+      if (e.response) {
+        toaster.danger(e.response.data.message);
       }
-      setLoading(false);
-    });
+    }
+    setLoading(false);
   };
 
   return (
@@ -36,15 +52,32 @@ function Login({ setUserLoggedIn }) {
         You are not logged in. Please login with your google account to view
         your dashboard.
       </Text>
-      <Button
-        onClick={handleLogin}
-        iconBefore={GoogleIcon}
-        size="large"
-        appearance="primary"
-        isLoading={loading}
-      >
-        Login with google
-      </Button>
+      <Pane width="60%" display="block" textAlign="left">
+        <TextInputField
+          label="Email"
+          name="email"
+          onChange={handleChange}
+          placeholder="Enter your email"
+        />
+        <TextInputField
+          label="Password"
+          name="password"
+          onChange={handleChange}
+          type="password"
+          placeholder="Enter your password"
+        />
+        <Button
+          appearance="primary"
+          position="relative"
+          left="50%"
+          size="large"
+          transform="translateX(-50%)"
+          onClick={handleLogin}
+          isLoading={loading}
+        >
+          Login
+        </Button>
+      </Pane>
     </Pane>
   );
 }
