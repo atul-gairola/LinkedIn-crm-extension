@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Button, Text, Pane, TextInputField, Strong } from 'evergreen-ui';
+import { Button, Text, Pane, TextInputField, Strong, toaster } from 'evergreen-ui';
+import axios from "axios";
 
 function Signup({ setFormType }) {
   const [loading, setLoading] = useState(false);
@@ -16,15 +17,20 @@ function Signup({ setFormType }) {
     }));
   }
 
-  const handleLogin = async () => {
+  const handleSignup = async () => {
     setLoading(true);
-    // chrome.runtime.sendMessage({ action: 'login' }, (res) => {
-    //   console.log(res);
-    //   if (res.status === 'success') {
-    //     setUserLoggedIn(true);
-    //   }
-    //   setLoading(false);
-    // });
+    try {
+      const { data } = await axios.post(
+        `http://localhost:8000/auth/signup`,
+        credentials
+      );
+      localStorage.setItem(token, data.jwt);
+    } catch (e) {
+      console.log(e);
+      if (e.response) {
+        toaster.danger(e.response.data.message);
+      }
+    }
     setLoading(false);
   };
 
@@ -51,7 +57,8 @@ function Signup({ setFormType }) {
         position="relative"
         left="50%"
         transform="translateX(-50%)"
-        onClick={handleLogin}
+        onClick={handleSignup}
+        isLoading={loading}
       >
         Signup
       </Button>
