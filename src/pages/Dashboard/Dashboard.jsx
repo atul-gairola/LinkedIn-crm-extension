@@ -81,9 +81,9 @@ function Dashboard({ setUserLoggedIn }) {
 
   useEffect(() => {
     // for dev
-    axios.defaults.baseURL = `http://localhost:8000`;
+    // axios.defaults.baseURL = `http://localhost:8000`;
     // for prod
-    // axios.defaults.baseURL = 'http://159.65.146.74:8000';
+    axios.defaults.baseURL = 'https://quiet-brook-98204.herokuapp.com';
     setLoading(true);
 
     chrome.runtime.sendMessage({ action: 'initialize' }, async (response) => {
