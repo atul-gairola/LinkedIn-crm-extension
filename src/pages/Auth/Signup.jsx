@@ -29,7 +29,7 @@ function Signup({ setFormType, setUserLoggedIn }) {
     try {
       const { data } = await axios.post(
         // `http://localhost:8000/auth/signup`,
-        "https://quiet-brook-98204.herokuapp.com",
+        "https://quiet-brook-98204.herokuapp.com/auth/signup",
         credentials
       );
       chrome.storage.sync.set({ token: data.jwt});

@@ -29,7 +29,7 @@ function Login({ setFormType, setUserLoggedIn }) {
     try {
       const { data } = await axios.post(
         // `http://localhost:8000/auth/login`,
-        "https://quiet-brook-98204.herokuapp.com",
+        "https://quiet-brook-98204.herokuapp.com/auth/login",
         credentials
       );
 
