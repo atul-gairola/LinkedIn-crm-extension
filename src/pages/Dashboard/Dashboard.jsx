@@ -61,7 +61,19 @@ function Dashboard({ userLoggedIn, setUserLoggedIn }) {
 
   async function updateConnectionsProcess() {
     const updateConnection = (response) => {
-      console.log(response);
+      const allConnectionsUpdated =
+        response.message && response.message === 'updatedAll';
+
+      if (allConnectionsUpdated) {
+        toaster.success('All the connections have been updated.');
+        return;
+      }
+
+      const { connection } = response;
+
+      // send update connection request to background
+      
+
     };
 
     chrome.runtime.sendMessage({ action: 'getNextUpdate' }, updateConnection);
@@ -73,13 +85,12 @@ function Dashboard({ userLoggedIn, setUserLoggedIn }) {
     // for prod
     // axios.defaults.baseURL = 'http://159.65.146.74:8000';
     setLoading(true);
+
     chrome.runtime.sendMessage({ action: 'initialize' }, async (response) => {
-      // if the user is not logged into linked in
       if (response.status === 'failed') {
         setLoading(false);
         return;
       }
-
       const { userDetails, contacts } = response;
 
       const validContacts = contacts.filter((cur) => cur);

@@ -24,6 +24,7 @@ const Popup = () => {
   ) : (
     <HomePopup />
   );
+
 };
 
 export default Popup;

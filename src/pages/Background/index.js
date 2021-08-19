@@ -30,6 +30,9 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
     case 'logout':
       handleLogout(sendResponse);
       return true;
+    case 'getCurrentLinkedInUser':
+      getLoggedInUser(sendResponse);
+      return true;
     case 'initialize':
       initialize(sendResponse);
       return true;
@@ -230,7 +233,7 @@ async function fetchLinkedInUrl(
  * @return {promise} => user is logged in ? userInfo : undefined
  */
 
-async function getLoggedInUser() {
+async function getLoggedInUser(sendResponse) {
   try {
     const resp = await fetchLinkedInUrl(
       'https://www.linkedin.com/voyager/api/identity/profiles/me',
@@ -238,6 +241,9 @@ async function getLoggedInUser() {
     );
 
     if (!resp) {
+      if (sendResponse) {
+        sendNotLoggedInResponse(sendResponse);
+      }
       return resp;
     }
 
@@ -264,6 +270,11 @@ async function getLoggedInUser() {
           resp.miniProfile.picture['com.linkedin.common.VectorImage']
             .artifacts[2].fileIdentifyingUrlPathSegment,
     };
+
+    if (sendResponse) {
+      sendResponse({ linkedInUser: result });
+    }
+
     return result;
   } catch (e) {
     console.log(e);
@@ -549,19 +560,22 @@ async function updateConnection(profileId, publicIdentifier, sendResponse) {
 
 // -----------------
 
-async function getNextUpdate() {
-  // await sleep(5000);
-  // // get the next connection to update
-  // const res = await fetch('http://localhost:8000/connections/update/next', {
-  //   method: 'GET',
-  // });
-  // const data = await res.json();
-  // const { next } = data;
-  // // if no next connection return
-  // if (!next) {
-  //   chrome.runtime.sendMessage({ message: 'collected_all' }, () => {});
-  //   return;
-  // }
+async function getNextUpdate(sendResponse) {
+  // get the next connection to update
+  const res = await fetch('http://localhost:8000/connections/update/next', {
+    method: 'GET',
+  });
+  const data = await res.json();
+  const { next } = data;
+
+  if (!next) {
+    sendResponse({ message: 'updatedAll' });
+    return;
+  } else {
+    sendResponse({ connection: next });
+    return;
+  }
+
   // const profileId =
   //   next.profileId || next.entityUrn.replace('urn:li:fsd_profile:', '');
   // // get the complete data
